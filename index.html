@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Balance</title>
+<meta name="theme-color" content="#14201A">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Balance">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<script src="config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1E6B4A; --verde-osc: #14503A; --verde-claro: #E3F1E9;
+    --fondo: #F4F6F5; --tinta: #14201A; --gris: #56635C; --borde: #DCE3DF;
+    --ambar-fondo: #FDF1E3; --ambar: #8A3F07; --rojo: #B3261E;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overscroll-behavior: none; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif; background: var(--fondo); color: var(--tinta);
+    display: flex; flex-direction: column; -webkit-text-size-adjust: 100%;
+  }
+  header { background: var(--tinta); color: #fff; padding: calc(18px + env(safe-area-inset-top)) 16px 16px; }
+  header .mes { margin: 0; font-size: 13px; color: #B9C7BF; text-transform: capitalize; }
+  header h1 { margin: 2px 0 10px; font-size: 22px; letter-spacing: -0.01em; }
+  header .total { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: #B9C7BF; }
+  header .total b { font-family: 'DM Mono', monospace; font-size: 22px; color: #F2B66D; font-weight: 500; }
+  #chat { flex: 1; overflow-y: auto; padding: 14px 12px 8px; display: flex; flex-direction: column; gap: 10px; }
+  .yo { align-self: flex-end; max-width: 80%; background: var(--verde); color: #fff; padding: 10px 14px; border-radius: 18px 18px 4px 18px; font-size: 15px; }
+  .yo img { display: block; max-width: 180px; border-radius: 10px; }
+  .bot { align-self: flex-start; width: 92%; background: #fff; border: 1px solid var(--borde); border-radius: 18px 18px 18px 4px; padding: 12px 14px; font-size: 14px; }
+  .bot.simple { width: auto; max-width: 85%; }
+  .ok { color: var(--verde); font-weight: 600; }
+  .error { color: var(--rojo); }
+  .aviso { background: var(--ambar-fondo); color: var(--ambar); border-radius: 10px; padding: 8px 10px; font-size: 13px; margin-bottom: 8px; }
+  .campos { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px 10px; align-items: center; }
+  .campos label { color: var(--gris); font-size: 13px; }
+  .campos input, .campos select {
+    width: 100%; min-height: 40px; border: 1px solid var(--borde); border-radius: 10px; padding: 0 10px;
+    font: inherit; font-size: 15px; background: var(--fondo); color: var(--tinta);
+  }
+  .campos input.monto { font-family: 'DM Mono', monospace; }
+  .botones { display: flex; gap: 8px; margin-top: 12px; }
+  .botones button { flex: 1; }
+  button { min-height: 44px; border-radius: 12px; font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; }
+  .primario { background: var(--verde); color: #fff; border: none; }
+  .secundario { background: #fff; color: var(--tinta); border: 1px solid var(--borde); }
+  button:disabled { opacity: .5; }
+  .ultimos { list-style: none; margin: 0; padding: 0; }
+  .ultimos li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid #EDF1EF; font-size: 13px; }
+  .ultimos li:last-child { border-bottom: none; }
+  .ultimos .m { font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .ultimos .d { color: var(--gris); }
+  footer { background: #fff; border-top: 1px solid var(--borde); padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  .icono { width: 44px; height: 44px; min-height: 44px; flex-shrink: 0; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; }
+  .icono.camara, .icono.galeria { background: var(--verde-claro); color: var(--verde); }
+  .icono.enviar { background: var(--verde); color: #fff; }
+  #texto { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--borde); border-radius: 22px; padding: 0 16px; font: inherit; font-size: 16px; background: var(--fondo); color: var(--tinta); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .pensando { color: var(--gris); font-style: italic; }
+  .opciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .opciones button { flex: 1 1 calc(50% - 8px); background: var(--verde-claro); color: var(--verde-osc); border: 1px solid #BFDCCB; }
+  .opciones button.quitar { flex-basis: 100%; background: #fff; color: var(--gris); border-color: var(--borde); font-weight: 500; }
+  .opciones button:disabled { opacity: .45; }
+  .resumen { color: var(--gris); font-size: 13px; margin-top: 4px; }
+  .velo { position: fixed; inset: 0; background: rgba(20, 32, 26, .55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  .modal { background: #fff; border-radius: 20px; padding: 20px; width: 100%; max-width: 360px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .modal h2 { margin: 0 0 8px; font-size: 18px; color: var(--ambar); }
+  .modal p { margin: 0 0 6px; font-size: 15px; line-height: 1.4; }
+  .modal .existente { background: var(--ambar-fondo); color: var(--ambar); border-radius: 10px; padding: 10px; font-size: 14px; margin: 10px 0 14px; }
+  .modal .botones { flex-direction: column; }
+  .deshacer { background: none; border: none; color: var(--verde); text-decoration: underline; font-weight: 600; min-height: 32px; padding: 0 4px; font-size: 14px; }
+  .acceso input { width: 100%; height: 48px; border: 1px solid var(--borde); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; margin: 6px 0 12px; background: var(--fondo); }
+  .acceso .error { font-size: 14px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <p class="mes" id="mes">&nbsp;</p>
+  <h1>Vila Paraiso</h1>
+  <div class="total"><span>Gastos del mes</span><b id="totalMes">—</b></div>
+</header>
+
+<main id="chat" aria-live="polite">
+  <div class="bot simple">Escribe un gasto en cualquier orden (<i>“1/10 ferretería 4985 efectivo”</i>) o toca la cámara para fotografiar un recibo (o la galería para elegir varios). Si falta algo, te pregunto antes de guardar.</div>
+</main>
+
+<footer>
+  <label class="icono camara" for="foto" aria-label="Tomar foto del recibo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+  </label>
+  <input id="foto" class="sr" type="file" accept="image/*" capture="environment">
+  <label class="icono galeria" for="galeria" aria-label="Elegir varias fotos de la galería">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>
+  </label>
+  <input id="galeria" class="sr" type="file" accept="image/*" multiple>
+  <label for="texto" class="sr">Describe el gasto</label>
+  <input id="texto" type="text" placeholder="Ej: 35 mil carne, tarjeta" autocomplete="off" enterkeyhint="send">
+  <button class="icono enviar" id="enviar" aria-label="Enviar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+</footer>
+
+<script>
+  var CONF = { categorias: [], pagos: [], hoy: '' };
+  var chat = document.getElementById('chat');
+  var colon = function (n) { return '₡' + Math.round(n).toLocaleString('es-CR'); };
+  var pendiente = null;   // gasto al que le falta un dato: { b, extra, campo, fin }
+  var cola = Promise.resolve();
+  var LIMITE_FOTO_MS = 20000;   // si la IA no lee la foto en 20 s, se pregunta a mano
+
+  function conLimite(promesa, ms) {
+    return new Promise(function (ok, mal) {
+      var t = setTimeout(function () { var e = new Error('tiempo'); e.tiempo = true; mal(e); }, ms);
+      promesa.then(function (v) { clearTimeout(t); ok(v); }, function (e) { clearTimeout(t); mal(e); });
+    });
+  }
+
+  /* ---------- Conexión con el motor (Apps Script) ---------- */
+  function leerCodigo() { try { return localStorage.getItem('codigo_acceso') || ''; } catch (e) { return ''; } }
+  function guardarCodigo(c) { try { localStorage.setItem('codigo_acceso', c); } catch (e) {} }
+  var CODIGO = leerCodigo();
+
+  function servidor(fn, arg) {
+    return fetch(window.API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      body: JSON.stringify({ token: CODIGO, accion: fn, datos: arg || null })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Sin conexión con el motor (' + r.status + ').');
+      return r.json();
+    }, function () {
+      throw new Error('Sin conexión. Revisa el internet e intenta de nuevo.');
+    }).then(function (j) {
+      if (!j.ok) {
+        if (/código de acceso/i.test(j.error || '')) pedirCodigo(j.error);
+        throw new Error(j.error || 'Error');
+      }
+      return j.resultado;
+    });
+  }
+
+  /** Primera vez (o si el código cambia): pide el código de acceso y lo guarda en este teléfono. */
+  function pedirCodigo(error) {
+    if (document.getElementById('acceso')) return;
+    var velo = document.createElement('div');
+    velo.className = 'velo';
+    velo.id = 'acceso';
+    velo.innerHTML = '<form class="modal acceso"><h2 style="color:var(--tinta)">Código de acceso</h2>' +
+      '<p>Escribe el código que guardaste en Apps Script (APP_TOKEN). Se pide una sola vez en este teléfono.</p>' +
+      (error && leerCodigo() ? '<div class="error">El código guardado no funciona. Escríbelo de nuevo.</div>' : '') +
+      '<label for="codigo" class="sr">Código</label><input id="codigo" type="password" autocomplete="current-password" required>' +
+      '<div class="botones"><button class="primario" type="submit">Entrar</button></div></form>';
+    document.body.appendChild(velo);
+    velo.querySelector('form').onsubmit = function (e) {
+      e.preventDefault();
+      CODIGO = velo.querySelector('#codigo').value.trim();
+      guardarCodigo(CODIGO);
+      velo.remove();
+      cargarInicio();
+    };
+    velo.querySelector('#codigo').focus();
+  }
+  function burbuja(clase, html) {
+    var d = document.createElement('div');
+    d.className = clase;
+    if (html instanceof Node) d.appendChild(html); else d.innerHTML = html;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+    return d;
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function fechaBonita(iso) { if (!iso) return ''; var p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+
+  function cargarInicio() {
+    servidor('getInicio').then(function (r) {
+      CONF = r;
+      document.getElementById('mes').textContent = r.mes;
+      document.getElementById('totalMes').textContent = colon(r.totalMes);
+      if (r.ultimos.length && !document.getElementById('lista-ultimos')) {
+        burbuja('bot', '<b>Últimos registros</b><ul class="ultimos" id="lista-ultimos">' + r.ultimos.map(function (u) {
+          return '<li><span>' + esc(u.descripcion || u.categoria) + ' <span class="d">· ' + esc(u.fecha) + '</span></span><span class="m">' + colon(u.monto) + '</span></li>';
+        }).join('') + '</ul>');
+      }
+    }).catch(function (e) { burbuja('bot simple error', esc(e.message)); });
+  }
+  function cargarTotal() {
+    servidor('getInicio').then(function (r) { document.getElementById('totalMes').textContent = colon(r.totalMes); });
+  }
+
+  /* ---------- Preguntar lo que falta ---------- */
+
+  var PREGUNTAS = {
+    monto: { texto: 'Monto?', opciones: [] },
+    fecha: { texto: 'Fecha?', opciones: ['Hoy', 'Ayer'] },
+    pago: { texto: 'Tipo de pago?', opciones: ['Tarjeta', 'Efectivo', 'SINPE', 'Transferencia'] },
+    descripcion: { texto: '¿Dónde fue la compra o qué compraste?', opciones: [] }
+  };
+
+  function faltante(b) {
+    if (!b.monto) return 'monto';
+    if (!b.fecha) return 'fecha';
+    if (!b.pago) return 'pago';
+    if (!b.descripcion) return 'descripcion';
+    return null;
+  }
+
+  /** Pregunta lo que falte; cuando está completo muestra la tarjeta. Devuelve una promesa que termina al guardar o descartar. */
+  function siguientePaso(b, extra, fin) {
+    var campo = faltante(b);
+    if (!campo) { pendiente = null; tarjeta(b, extra, fin); return; }
+    var q = PREGUNTAS[campo];
+    var caja = document.createElement('div');
+    pendiente = { b: b, extra: extra, campo: campo, fin: fin, caja: caja };
+    var hecho = [];
+    if (b.descripcion) hecho.push(esc(b.descripcion));
+    if (b.monto) hecho.push(colon(b.monto));
+    if (b.fecha) hecho.push(fechaBonita(b.fecha));
+    if (b.pago) hecho.push(esc(b.pago));
+    caja.innerHTML = (b.nota ? '<div class="aviso">' + esc(b.nota) + '</div>' : '') +
+      '<div>' + q.texto + '</div>' +
+      (hecho.length ? '<div class="resumen">Tengo: ' + hecho.join(' · ') + '</div>' : '') +
+      '<div class="opciones">' + q.opciones.map(function (o) { return '<button type="button">' + o + '</button>'; }).join('') +
+      '<button type="button" class="quitar">Cancelar este gasto</button></div>';
+    b.nota = '';
+    burbuja('bot', caja);
+    caja.querySelectorAll('.opciones button').forEach(function (btn) {
+      btn.onclick = function () {
+        caja.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+        if (btn.classList.contains('quitar')) {
+          pendiente = null; burbuja('bot simple', 'Gasto cancelado.'); if (fin) fin(); return;
+        }
+        responder(btn.textContent);
+      };
+    });
+    if (!q.opciones.length) document.getElementById('texto').focus();
+  }
+
+  /** Respuesta a la pregunta pendiente: se lee y se completa solo lo que faltaba. */
+  function responder(t) {
+    var p = pendiente;
+    if (!p) return;
+    burbuja('yo', esc(t));
+    p.caja.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    var b = p.b;
+    if (p.campo === 'pago') {
+      var elegido = CONF.pagos.filter(function (x) { return x.toLowerCase() === t.trim().toLowerCase(); })[0];
+      if (elegido) { b.pago = elegido; siguientePaso(b, p.extra, p.fin); return; }
+    }
+    if (p.campo === 'descripcion') { b.descripcion = t.trim(); siguientePaso(b, p.extra, p.fin); return; }
+    var espera = burbuja('bot simple pensando', '…');
+    servidor('interpretar', { texto: t }).then(function (r) {
+      espera.remove();
+      if (!b.monto && r.monto) b.monto = r.monto;
+      if (!b.fecha && r.fecha) b.fecha = r.fecha;
+      if (!b.pago && r.pago) b.pago = r.pago;
+      if (!b.descripcion && r.descripcion) { b.descripcion = r.descripcion; b.categoria = r.categoria; }
+      if (faltante(b) === p.campo) b.nota = 'No entendí. ' + (p.campo === 'monto' ? 'Escribe solo el número, ej. 4985.' : p.campo === 'fecha' ? 'Escribe la fecha como 1/10.' : '');
+      siguientePaso(b, p.extra, p.fin);
+    }).catch(function (e) { espera.className = 'bot simple error'; espera.textContent = e.message; });
+  }
+
+  /* ---------- Aviso de duplicado (ventana que hay que contestar) ---------- */
+
+  function preguntarDuplicado(existente) {
+    return new Promise(function (listo) {
+      var velo = document.createElement('div');
+      velo.className = 'velo';
+      velo.setAttribute('role', 'dialog');
+      velo.setAttribute('aria-modal', 'true');
+      velo.innerHTML = '<div class="modal"><h2>¿Ya está registrado?</h2>' +
+        '<p>Hay un gasto con el mismo monto y fecha parecida:</p>' +
+        '<div class="existente">' + esc(existente) + '</div>' +
+        '<div class="botones"><button type="button" class="primario">Es el mismo · no guardar</button>' +
+        '<button type="button" class="secundario">Es otro gasto · guardar</button></div></div>';
+      document.body.appendChild(velo);
+      var b = velo.querySelectorAll('button');
+      b[0].focus();
+      b[0].onclick = function () { velo.remove(); listo(false); };
+      b[1].onclick = function () { velo.remove(); listo(true); };
+    });
+  }
+
+  /* ---------- Tarjeta de confirmación ---------- */
+
+  function tarjeta(b, extra, fin) {
+    var caja = document.createElement('div');
+    var opciones = function (lista, sel) { return lista.map(function (o) { return '<option' + (o === sel ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join(''); };
+    var id = 'g' + Date.now() + Math.floor(Math.random() * 1000);
+    caja.innerHTML =
+      '<div style="margin-bottom:10px"><b>¿Guardo este gasto?</b></div>' +
+      '<div class="campos">' +
+      '<label for="' + id + 'f">Fecha</label><input id="' + id + 'f" type="date" value="' + esc(b.fecha) + '">' +
+      '<label for="' + id + 'm">Monto ₡</label><input id="' + id + 'm" class="monto" type="number" inputmode="numeric" value="' + esc(b.monto) + '">' +
+      '<label for="' + id + 'd">Descripción</label><input id="' + id + 'd" type="text" value="' + esc(b.descripcion) + '">' +
+      '<label for="' + id + 'c">Categoría</label><select id="' + id + 'c">' + opciones(CONF.categorias, b.categoria) + '</select>' +
+      '<label for="' + id + 'p">Pago</label><select id="' + id + 'p">' + opciones(CONF.pagos, b.pago) + '</select>' +
+      '</div>' +
+      '<div class="botones"><button class="primario">Guardar</button><button class="secundario">Descartar</button></div>';
+    var burb = burbuja('bot', caja);
+    var btns = caja.querySelectorAll('.botones button');
+    var valor = function (s) { return caja.querySelector('#' + id + s).value; };
+    var terminar = function () { if (fin) { var f = fin; fin = null; f(); } };
+
+    function guardar(forzar) {
+      if (!valor('f') || !Number(valor('m'))) { alertaCampos(); return; }
+      btns[0].disabled = btns[1].disabled = true;
+      btns[0].textContent = 'Guardando…';
+      servidor('guardarGasto', {
+        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), categoria: valor('c'), pago: valor('p'),
+        foto: extra && extra.foto, mime: extra && extra.mime, forzar: !!forzar
+      }).then(function (r) {
+        if (r.duplicado) {
+          btns[0].textContent = 'Guardar';
+          preguntarDuplicado(r.existente).then(function (esOtro) {
+            if (esOtro) { guardar(true); return; }
+            burb.innerHTML = '<span class="d">No guardado: ya estaba registrado.</span>';
+            burb.classList.add('simple');
+            terminar();
+          });
+          return;
+        }
+        var resumen = esc(valor('d') || valor('c')) + ' · ' + colon(valor('m')) + ' · ' + fechaBonita(valor('f')) + ' · ' + esc(valor('p'));
+        burb.innerHTML = '<span class="ok">✓ Guardado</span> · ' + resumen + ' <button type="button" class="deshacer">Deshacer</button>';
+        burb.classList.add('simple');
+        burb.querySelector('.deshacer').onclick = function () {
+          this.disabled = true; this.textContent = 'Borrando…';
+          servidor('deshacerGasto', { fila: r.fila, marca: r.marca }).then(function () {
+            burb.innerHTML = '<span class="d">Borrado · ' + resumen + '</span>';
+            cargarTotal();
+          }).catch(function (e) { burbuja('bot simple error', esc(e.message)); });
+        };
+        cargarTotal();
+        terminar();
+      }).catch(function (e) {
+        btns[0].disabled = btns[1].disabled = false;
+        btns[0].textContent = 'Reintentar';
+        burbuja('bot simple error', esc(e.message));
+      });
+    }
+    function alertaCampos() {
+      var av = document.createElement('div');
+      av.className = 'aviso';
+      av.textContent = 'Falta la fecha o el monto.';
+      caja.insertBefore(av, caja.firstChild);
+    }
+    btns[0].onclick = function () { guardar(false); };
+    btns[1].onclick = function () { burb.innerHTML = '<span class="d">Descartado</span>'; burb.classList.add('simple'); terminar(); };
+  }
+
+  /* ---------- Texto ---------- */
+
+  function enviarTexto() {
+    var campo = document.getElementById('texto');
+    var t = campo.value.trim();
+    if (!t) return;
+    campo.value = '';
+    if (pendiente) { responder(t); return; }
+    burbuja('yo', esc(t));
+    var espera = burbuja('bot simple pensando', 'Leyendo…');
+    servidor('interpretar', { texto: t }).then(function (b) { espera.remove(); siguientePaso(b, null, null); })
+      .catch(function (e) { espera.className = 'bot simple error'; espera.textContent = e.message; });
+  }
+  document.getElementById('enviar').onclick = enviarTexto;
+  document.getElementById('texto').addEventListener('keydown', function (e) { if (e.key === 'Enter') enviarTexto(); });
+
+  /* ---------- Fotos: una por una; la siguiente empieza cuando terminas la anterior ---------- */
+
+  function reducir(archivo) {
+    return new Promise(function (ok, mal) {
+      var lector = new FileReader();
+      lector.onerror = mal;
+      lector.onload = function () {
+        var img = new Image();
+        img.onerror = function () { mal(new Error('No pude abrir esa imagen.')); };
+        img.onload = function () {
+          var max = 1600, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
+          var c = document.createElement('canvas');
+          c.width = Math.round(w * k); c.height = Math.round(h * k);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          var url = c.toDataURL('image/jpeg', 0.8);
+          ok({ url: url, base64: url.split(',')[1] });
+        };
+        img.src = lector.result;
+      };
+      lector.readAsDataURL(archivo);
+    });
+  }
+
+  function alElegirFotos(e) {
+    var archivos = Array.prototype.slice.call(e.target.files || []);
+    e.target.value = '';
+    archivos.forEach(function (archivo, i) {
+      cola = cola.then(function () {
+        return reducir(archivo).then(function (r) {
+          burbuja('yo', '<img src="' + r.url + '" alt="Recibo">' + (archivos.length > 1 ? '<div style="font-size:12px;margin-top:4px">Foto ' + (i + 1) + ' de ' + archivos.length + '</div>' : ''));
+          var espera = burbuja('bot simple pensando', 'Leyendo el recibo…');
+          var extra = { foto: r.base64, mime: 'image/jpeg' };
+          return conLimite(servidor('interpretar', extra), LIMITE_FOTO_MS).then(function (b) {
+            espera.remove();
+            return new Promise(function (listo) { siguientePaso(b, extra, listo); });
+          }).catch(function (err) {
+            // Si la IA tarda más del límite o falla: se piden los datos a mano (la foto se guarda igual)
+            espera.remove();
+            var vacio = { fecha: '', monto: 0, descripcion: '', categoria: 'Insumos Alimenticios', pago: '',
+              nota: err && err.tiempo ? 'No pude leer la foto a tiempo. Te pregunto los datos.' : 'No pude leer la foto. Te pregunto los datos.' };
+            return new Promise(function (listo) { siguientePaso(vacio, extra, listo); });
+          });
+        }).catch(function (err) { burbuja('bot simple error', esc(err.message)); });
+      });
+    });
+  }
+  document.getElementById('foto').addEventListener('change', alElegirFotos);
+  document.getElementById('galeria').addEventListener('change', alElegirFotos);
+
+  if (!window.API_URL || /PEGAR/.test(window.API_URL)) {
+    burbuja('bot simple error', 'Falta el enlace del motor en config.js.');
+  } else if (!CODIGO) { pedirCodigo(); } else { cargarInicio(); }
+</script>
+</body>
+</html>
