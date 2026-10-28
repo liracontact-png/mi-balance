@@ -201,7 +201,7 @@
 
   var PREGUNTAS = {
     monto: { texto: 'Monto?', opciones: [] },
-    fecha: { texto: 'Fecha?', opciones: ['Hoy', 'Ayer'] },
+    fecha: { texto: 'Fecha?', opciones: ['Hoy', 'Ayer', 'Otra fecha'] },
     pago: { texto: 'Tipo de pago?', opciones: ['Tarjeta', 'Efectivo', 'SINPE', 'Transferencia'] },
     descripcion: { texto: '¿Dónde fue la compra o qué compraste?', opciones: [] },
     rubro: { texto: 'Fila del Balance?', opciones: [] }
@@ -214,7 +214,7 @@
   function faltante(b) {
     if (b.rubros && b.rubros.length && !b.rubro) return 'rubro';
     if (!b.monto) return 'monto';
-    if (!b.fecha) return 'fecha';
+    if (!b.fecha && !(b.rubro && b.mes)) return 'fecha';   // fila del Balance con periodo dicho: la fecha no importa
     if (!b.pago && !b.rubro) return 'pago';   // las filas del Balance no piden tipo de pago
     if (!b.descripcion && !b.rubro) return 'descripcion';
     return null;
@@ -243,6 +243,7 @@
     caja.querySelectorAll('.opciones button').forEach(function (btn) {
       btn.onclick = function () {
         caja.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+        if (btn.textContent === 'Otra fecha') { otraFecha(caja, b, extra, fin); return; }
         if (btn.classList.contains('quitar')) {
           pendiente = null; burbuja('bot simple', 'Gasto cancelado.'); if (fin) fin(); return;
         }
@@ -250,6 +251,24 @@
       };
     });
     if (!q.opciones.length) document.getElementById('texto').focus();
+  }
+
+  /** "Otra fecha": calendario para elegirla */
+  function otraFecha(caja, b, extra, fin) {
+    var zona = document.createElement('div');
+    zona.className = 'opciones';
+    zona.innerHTML = '<input type="date" aria-label="Fecha" max="' + (CONF.hoy || '') + '" style="flex:1;min-width:0;font-size:16px;padding:8px">' +
+      '<button type="button" class="primario">OK</button>';
+    caja.appendChild(zona);
+    var entrada = zona.querySelector('input'), ok = zona.querySelector('button');
+    if (entrada.showPicker) { try { entrada.showPicker(); } catch (e) {} } else entrada.focus();
+    ok.onclick = function () {
+      if (!entrada.value) { entrada.focus(); return; }
+      ok.disabled = entrada.disabled = true;
+      burbuja('yo', fechaBonita(entrada.value));
+      b.fecha = entrada.value;
+      siguientePaso(b, extra, fin);
+    };
   }
 
   /** Respuesta a la pregunta pendiente: se lee y se completa solo lo que faltaba. */
@@ -274,6 +293,7 @@
       if (!b.monto && r.monto) b.monto = r.monto;
       if (!b.fecha && r.fecha) b.fecha = r.fecha;
       if (!b.pago && r.pago) b.pago = r.pago;
+      if (!b.mes && r.mes) b.mes = r.mes;
       if (!b.descripcion && r.descripcion) { b.descripcion = r.descripcion; b.categoria = r.categoria; }
       if (faltante(b) === p.campo) b.nota = 'No entendí. ' + (p.campo === 'monto' ? 'Escribe solo el número, ej. 4985.' : p.campo === 'fecha' ? 'Escribe la fecha como 1/10.' : '');
       siguientePaso(b, p.extra, p.fin);
@@ -321,11 +341,11 @@
     caja.innerHTML =
       '<div class="destino"></div><div style="margin-bottom:10px"><b class="titulo">¿Guardo este gasto?</b></div>' +
       '<div class="campos">' +
-      '<label for="' + id + 'f">Fecha</label><input id="' + id + 'f" type="date" value="' + esc(b.fecha) + '">' +
+      '<label for="' + id + 'f" class="fila-fecha">Fecha</label><input id="' + id + 'f" class="fila-fecha" type="date" value="' + esc(b.fecha || (b.rubro && b.mes ? CONF.hoy : '')) + '">' +
       '<label for="' + id + 'm">Monto ' + (b.moneda === 'USD' ? 'US$' : '₡') + '</label><input id="' + id + 'm" class="monto" type="number" inputmode="numeric" value="' + esc(b.monto) + '">' +
       '<label for="' + id + 'd">Descripción</label><input id="' + id + 'd" type="text" value="' + esc(b.descripcion) + '">' +
       '<label for="' + id + 'c">Va a</label><select id="' + id + 'c">' + destinos(b) + '</select>' +
-      '<label for="' + id + 'x" class="fila-mes">Mes</label><select id="' + id + 'x" class="fila-mes">' +
+      '<label for="' + id + 'x" class="fila-mes">Periodo</label><select id="' + id + 'x" class="fila-mes">' +
         ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
           .map(function (m, i) { return '<option value="' + (i + 1) + '">' + m + '</option>'; }).join('') + '</select>' +
       '<label for="' + id + 'p" class="fila-pago">Pago</label><select class="fila-pago" id="' + id + 'p">' + (b.pago ? '' : '<option value="">—</option>') + opciones(CONF.pagos, b.pago) + '</select>' +
@@ -344,6 +364,7 @@
       var balance = selDestino.value.indexOf('B|') === 0;
       caja.querySelectorAll('.fila-pago').forEach(function (el) { el.style.display = balance ? 'none' : ''; });
       caja.querySelectorAll('.fila-mes').forEach(function (el) { el.style.display = balance ? '' : 'none'; });
+      caja.querySelectorAll('.fila-fecha').forEach(function (el) { el.style.display = balance ? 'none' : ''; });
       if (balance) {
         var rubro = selDestino.value.slice(2), fila = rubro.trim(), ingreso = esIngreso(rubro);
         var f = caja.querySelector('#' + id + 'f').value;
@@ -353,7 +374,7 @@
           var sugerido = b.mes || (mesAnterior(rubro) ? (m === 1 ? 12 : m - 1) : m);
           selMes.value = String(sugerido);
         }
-        aviso.textContent = (ingreso ? 'Entrada' : 'Gasto fijo') + ' → Balance · ' + fila + ' · ' + MESES[Number(selMes.value) - 1];
+        aviso.textContent = (ingreso ? 'Entrada' : 'Gasto fijo') + ' → Balance · ' + fila + ' · Periodo ' + MESES[Number(selMes.value) - 1].toLowerCase();
         aviso.className = 'destino' + (ingreso ? ' ingreso' : '');
         aviso.style.display = 'block';
         titulo.textContent = ingreso ? '¿Guardo esta entrada?' : '¿Guardo este gasto fijo?';
