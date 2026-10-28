@@ -79,6 +79,8 @@
   .deshacer { background: none; border: none; color: var(--verde); text-decoration: underline; font-weight: 600; min-height: 32px; padding: 0 4px; font-size: 14px; }
   .acceso input { width: 100%; height: 48px; border: 1px solid var(--borde); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; margin: 6px 0 12px; background: var(--fondo); }
   .acceso .error { font-size: 14px; margin-bottom: 8px; }
+  .destino { display: none; background: var(--verde-claro); color: var(--verde-osc); border: 1px solid #BFDCCB; border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .destino.ingreso { background: #E8F0FB; color: #1F4E8C; border-color: #C5D6EE; }
 </style>
 </head>
 <body>
@@ -213,7 +215,7 @@
     if (b.rubros && b.rubros.length && !b.rubro) return 'rubro';
     if (!b.monto) return 'monto';
     if (!b.fecha) return 'fecha';
-    if (!b.pago && !esIngreso(b.rubro)) return 'pago';
+    if (!b.pago && !b.rubro) return 'pago';   // las filas del Balance no piden tipo de pago
     if (!b.descripcion && !b.rubro) return 'descripcion';
     return null;
   }
@@ -317,28 +319,64 @@
     var opciones = function (lista, sel) { return lista.map(function (o) { return '<option' + (o === sel ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join(''); };
     var id = 'g' + Date.now() + Math.floor(Math.random() * 1000);
     caja.innerHTML =
-      '<div style="margin-bottom:10px"><b>¿Guardo este gasto?</b></div>' +
+      '<div class="destino"></div><div style="margin-bottom:10px"><b class="titulo">¿Guardo este gasto?</b></div>' +
       '<div class="campos">' +
       '<label for="' + id + 'f">Fecha</label><input id="' + id + 'f" type="date" value="' + esc(b.fecha) + '">' +
       '<label for="' + id + 'm">Monto ' + (b.moneda === 'USD' ? 'US$' : '₡') + '</label><input id="' + id + 'm" class="monto" type="number" inputmode="numeric" value="' + esc(b.monto) + '">' +
       '<label for="' + id + 'd">Descripción</label><input id="' + id + 'd" type="text" value="' + esc(b.descripcion) + '">' +
       '<label for="' + id + 'c">Va a</label><select id="' + id + 'c">' + destinos(b) + '</select>' +
-      '<label for="' + id + 'p">Pago</label><select id="' + id + 'p">' + (b.pago ? '' : '<option value="">—</option>') + opciones(CONF.pagos, b.pago) + '</select>' +
+      '<label for="' + id + 'x" class="fila-mes">Mes</label><select id="' + id + 'x" class="fila-mes">' +
+        ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+          .map(function (m, i) { return '<option value="' + (i + 1) + '">' + m + '</option>'; }).join('') + '</select>' +
+      '<label for="' + id + 'p" class="fila-pago">Pago</label><select class="fila-pago" id="' + id + 'p">' + (b.pago ? '' : '<option value="">—</option>') + opciones(CONF.pagos, b.pago) + '</select>' +
       '</div>' +
       '<div class="botones"><button class="primario">Guardar</button><button class="secundario">Descartar</button></div>';
     var burb = burbuja('bot', caja);
     var btns = caja.querySelectorAll('.botones button');
+    // El tipo de pago solo aplica a compras del día (Data), no a filas del Balance
+    var selDestino = caja.querySelector('#' + id + 'c');
+    var MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    var aviso = caja.querySelector('.destino'), titulo = caja.querySelector('.titulo');
+    var selMes = caja.querySelector('#' + id + 'x'), mesTocado = false;
+    selMes.onchange = function () { mesTocado = true; mostrarPago(); };
+    var mesAnterior = function (rubro) { return (CONF.rubros || []).some(function (r) { return r.nombre === rubro && r.mesAnterior; }); };
+    var mostrarPago = function () {
+      var balance = selDestino.value.indexOf('B|') === 0;
+      caja.querySelectorAll('.fila-pago').forEach(function (el) { el.style.display = balance ? 'none' : ''; });
+      caja.querySelectorAll('.fila-mes').forEach(function (el) { el.style.display = balance ? '' : 'none'; });
+      if (balance) {
+        var rubro = selDestino.value.slice(2), fila = rubro.trim(), ingreso = esIngreso(rubro);
+        var f = caja.querySelector('#' + id + 'f').value;
+        if (!mesTocado && f) {
+          // Mes sugerido: el que se dijo en el chat; si la fila se paga atrasada (agua, luz…), el mes anterior a la fecha
+          var m = Number(f.split('-')[1]);
+          var sugerido = b.mes || (mesAnterior(rubro) ? (m === 1 ? 12 : m - 1) : m);
+          selMes.value = String(sugerido);
+        }
+        aviso.textContent = (ingreso ? 'Entrada' : 'Gasto fijo') + ' → Balance · ' + fila + ' · ' + MESES[Number(selMes.value) - 1];
+        aviso.className = 'destino' + (ingreso ? ' ingreso' : '');
+        aviso.style.display = 'block';
+        titulo.textContent = ingreso ? '¿Guardo esta entrada?' : '¿Guardo este gasto fijo?';
+      } else {
+        aviso.style.display = 'none';
+        titulo.textContent = '¿Guardo este gasto?';
+      }
+    };
+    selDestino.onchange = mostrarPago;
+    caja.querySelector('#' + id + 'f').onchange = mostrarPago;
+    mostrarPago();
     var valor = function (s) { return caja.querySelector('#' + id + s).value; };
     var terminar = function () { if (fin) { var f = fin; fin = null; f(); } };
 
     function guardar(forzar) {
       if (!valor('f') || !Number(valor('m'))) { alertaCampos(); return; }
+      if (valor('c').indexOf('D|') === 0 && !valor('p')) { alertaCampos('Falta el tipo de pago.'); return; }
       btns[0].disabled = btns[1].disabled = true;
       btns[0].textContent = 'Guardando…';
       var dest = valor('c'), enBalance = dest.indexOf('B|') === 0;
       servidor('guardarGasto', {
-        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), pago: valor('p'), moneda: b.moneda || 'CRC',
-        categoria: enBalance ? '' : dest.slice(2), rubro: enBalance ? dest.slice(2) : '',
+        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), pago: enBalance ? '' : valor('p'), moneda: b.moneda || 'CRC',
+        categoria: enBalance ? '' : dest.slice(2), rubro: enBalance ? dest.slice(2) : '', mes: enBalance ? Number(valor('x')) : 0,
         forzar: !!forzar   // la foto no se guarda: solo se usa para leer los datos
       }).then(function (r) {
         if (r.duplicado) {
@@ -372,10 +410,10 @@
         burbuja('bot simple error', esc(e.message));
       });
     }
-    function alertaCampos() {
+    function alertaCampos(texto) {
       var av = document.createElement('div');
       av.className = 'aviso';
-      av.textContent = 'Falta la fecha o el monto.';
+      av.textContent = texto || 'Falta la fecha o el monto.';
       caja.insertBefore(av, caja.firstChild);
     }
     btns[0].onclick = function () { guardar(false); };
