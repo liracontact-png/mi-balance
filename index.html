@@ -1,18 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<base target="_top">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mi Balance</title>
-<meta name="theme-color" content="#14201A">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Balance">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-192.png">
-<script src="config.js"></script>
+<meta name="theme-color" content="#1E6B4A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -22,12 +13,12 @@
     --ambar-fondo: #FDF1E3; --ambar: #8A3F07; --rojo: #B3261E;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overscroll-behavior: none; }
+  html, body { margin: 0; height: 100%; }
   body {
     font-family: 'DM Sans', system-ui, sans-serif; background: var(--fondo); color: var(--tinta);
     display: flex; flex-direction: column; -webkit-text-size-adjust: 100%;
   }
-  header { background: var(--tinta); color: #fff; padding: calc(18px + env(safe-area-inset-top)) 16px 16px; }
+  header { background: var(--tinta); color: #fff; padding: 18px 16px 16px; }
   header .mes { margin: 0; font-size: 13px; color: #B9C7BF; text-transform: capitalize; }
   header h1 { margin: 2px 0 10px; font-size: 22px; letter-spacing: -0.01em; }
   header .total { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: #B9C7BF; }
@@ -77,8 +68,6 @@
   .modal .existente { background: var(--ambar-fondo); color: var(--ambar); border-radius: 10px; padding: 10px; font-size: 14px; margin: 10px 0 14px; }
   .modal .botones { flex-direction: column; }
   .deshacer { background: none; border: none; color: var(--verde); text-decoration: underline; font-weight: 600; min-height: 32px; padding: 0 4px; font-size: 14px; }
-  .acceso input { width: 100%; height: 48px; border: 1px solid var(--borde); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; margin: 6px 0 12px; background: var(--fondo); }
-  .acceso .error { font-size: 14px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -123,50 +112,10 @@
     });
   }
 
-  /* ---------- Conexión con el motor (Apps Script) ---------- */
-  function leerCodigo() { try { return localStorage.getItem('codigo_acceso') || ''; } catch (e) { return ''; } }
-  function guardarCodigo(c) { try { localStorage.setItem('codigo_acceso', c); } catch (e) {} }
-  var CODIGO = leerCodigo();
-
   function servidor(fn, arg) {
-    return fetch(window.API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ token: CODIGO, accion: fn, datos: arg || null })
-    }).then(function (r) {
-      if (!r.ok) throw new Error('Sin conexión con el motor (' + r.status + ').');
-      return r.json();
-    }, function () {
-      throw new Error('Sin conexión. Revisa el internet e intenta de nuevo.');
-    }).then(function (j) {
-      if (!j.ok) {
-        if (/código de acceso/i.test(j.error || '')) pedirCodigo(j.error);
-        throw new Error(j.error || 'Error');
-      }
-      return j.resultado;
+    return new Promise(function (ok, mal) {
+      google.script.run.withSuccessHandler(ok).withFailureHandler(function (e) { mal(e && e.message ? e : new Error(String(e))); })[fn](arg);
     });
-  }
-
-  /** Primera vez (o si el código cambia): pide el código de acceso y lo guarda en este teléfono. */
-  function pedirCodigo(error) {
-    if (document.getElementById('acceso')) return;
-    var velo = document.createElement('div');
-    velo.className = 'velo';
-    velo.id = 'acceso';
-    velo.innerHTML = '<form class="modal acceso"><h2 style="color:var(--tinta)">Código de acceso</h2>' +
-      '<p>Escribe el código que guardaste en Apps Script (APP_TOKEN). Se pide una sola vez en este teléfono.</p>' +
-      (error && leerCodigo() ? '<div class="error">El código guardado no funciona. Escríbelo de nuevo.</div>' : '') +
-      '<label for="codigo" class="sr">Código</label><input id="codigo" type="password" autocomplete="current-password" required>' +
-      '<div class="botones"><button class="primario" type="submit">Entrar</button></div></form>';
-    document.body.appendChild(velo);
-    velo.querySelector('form').onsubmit = function (e) {
-      e.preventDefault();
-      CODIGO = velo.querySelector('#codigo').value.trim();
-      guardarCodigo(CODIGO);
-      velo.remove();
-      cargarInicio();
-    };
-    velo.querySelector('#codigo').focus();
   }
   function burbuja(clase, html) {
     var d = document.createElement('div');
@@ -201,14 +150,20 @@
     monto: { texto: 'Monto?', opciones: [] },
     fecha: { texto: 'Fecha?', opciones: ['Hoy', 'Ayer'] },
     pago: { texto: 'Tipo de pago?', opciones: ['Tarjeta', 'Efectivo', 'SINPE', 'Transferencia'] },
-    descripcion: { texto: '¿Dónde fue la compra o qué compraste?', opciones: [] }
+    descripcion: { texto: '¿Dónde fue la compra o qué compraste?', opciones: [] },
+    rubro: { texto: 'Fila del Balance?', opciones: [] }
   };
 
+  function esIngreso(rubro) {
+    return (CONF.rubros || []).some(function (r) { return r.nombre === rubro && r.ingreso; });
+  }
+
   function faltante(b) {
+    if (b.rubros && b.rubros.length && !b.rubro) return 'rubro';
     if (!b.monto) return 'monto';
     if (!b.fecha) return 'fecha';
-    if (!b.pago) return 'pago';
-    if (!b.descripcion) return 'descripcion';
+    if (!b.pago && !esIngreso(b.rubro)) return 'pago';
+    if (!b.descripcion && !b.rubro) return 'descripcion';
     return null;
   }
 
@@ -220,14 +175,15 @@
     var caja = document.createElement('div');
     pendiente = { b: b, extra: extra, campo: campo, fin: fin, caja: caja };
     var hecho = [];
-    if (b.descripcion) hecho.push(esc(b.descripcion));
-    if (b.monto) hecho.push(colon(b.monto));
+    if (b.rubro) hecho.push('Balance: ' + esc(b.rubro.trim()));
+    else if (b.descripcion) hecho.push(esc(b.descripcion));
+    if (b.monto) hecho.push(b.moneda === 'USD' ? 'US$' + b.monto : colon(b.monto));
     if (b.fecha) hecho.push(fechaBonita(b.fecha));
     if (b.pago) hecho.push(esc(b.pago));
     caja.innerHTML = (b.nota ? '<div class="aviso">' + esc(b.nota) + '</div>' : '') +
       '<div>' + q.texto + '</div>' +
       (hecho.length ? '<div class="resumen">Tengo: ' + hecho.join(' · ') + '</div>' : '') +
-      '<div class="opciones">' + q.opciones.map(function (o) { return '<button type="button">' + o + '</button>'; }).join('') +
+      '<div class="opciones">' + (campo === 'rubro' ? b.rubros : q.opciones).map(function (o) { return '<button type="button">' + o + '</button>'; }).join('') +
       '<button type="button" class="quitar">Cancelar este gasto</button></div>';
     b.nota = '';
     burbuja('bot', caja);
@@ -255,6 +211,10 @@
       if (elegido) { b.pago = elegido; siguientePaso(b, p.extra, p.fin); return; }
     }
     if (p.campo === 'descripcion') { b.descripcion = t.trim(); siguientePaso(b, p.extra, p.fin); return; }
+    if (p.campo === 'rubro') {
+      var r = (b.rubros || []).filter(function (x) { return x.trim().toLowerCase() === t.trim().toLowerCase(); })[0];
+      if (r) { b.rubro = r; siguientePaso(b, p.extra, p.fin); return; }
+    }
     var espera = burbuja('bot simple pensando', '…');
     servidor('interpretar', { texto: t }).then(function (r) {
       espera.remove();
@@ -290,6 +250,17 @@
 
   /* ---------- Tarjeta de confirmación ---------- */
 
+  /** Lista de destinos: categorías del día a día (Data) y filas del Balance. Valor "D|..." o "B|...". */
+  function destinos(b) {
+    var sel = b.rubro ? 'B|' + b.rubro : 'D|' + b.categoria;
+    var op = function (v, txt) { return '<option value="' + esc(v) + '"' + (v === sel ? ' selected' : '') + '>' + esc(txt) + '</option>'; };
+    var gastos = (CONF.rubros || []).filter(function (r) { return !r.ingreso; });
+    var ingresos = (CONF.rubros || []).filter(function (r) { return r.ingreso; });
+    return '<optgroup label="Compras del día">' + CONF.categorias.map(function (c) { return op('D|' + c, c); }).join('') + '</optgroup>' +
+      (gastos.length ? '<optgroup label="Balance · gastos">' + gastos.map(function (r) { return op('B|' + r.nombre, r.nombre.trim()); }).join('') + '</optgroup>' : '') +
+      (ingresos.length ? '<optgroup label="Balance · entradas">' + ingresos.map(function (r) { return op('B|' + r.nombre, r.nombre.trim()); }).join('') + '</optgroup>' : '');
+  }
+
   function tarjeta(b, extra, fin) {
     var caja = document.createElement('div');
     var opciones = function (lista, sel) { return lista.map(function (o) { return '<option' + (o === sel ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join(''); };
@@ -298,10 +269,10 @@
       '<div style="margin-bottom:10px"><b>¿Guardo este gasto?</b></div>' +
       '<div class="campos">' +
       '<label for="' + id + 'f">Fecha</label><input id="' + id + 'f" type="date" value="' + esc(b.fecha) + '">' +
-      '<label for="' + id + 'm">Monto ₡</label><input id="' + id + 'm" class="monto" type="number" inputmode="numeric" value="' + esc(b.monto) + '">' +
+      '<label for="' + id + 'm">Monto ' + (b.moneda === 'USD' ? 'US$' : '₡') + '</label><input id="' + id + 'm" class="monto" type="number" inputmode="numeric" value="' + esc(b.monto) + '">' +
       '<label for="' + id + 'd">Descripción</label><input id="' + id + 'd" type="text" value="' + esc(b.descripcion) + '">' +
-      '<label for="' + id + 'c">Categoría</label><select id="' + id + 'c">' + opciones(CONF.categorias, b.categoria) + '</select>' +
-      '<label for="' + id + 'p">Pago</label><select id="' + id + 'p">' + opciones(CONF.pagos, b.pago) + '</select>' +
+      '<label for="' + id + 'c">Va a</label><select id="' + id + 'c">' + destinos(b) + '</select>' +
+      '<label for="' + id + 'p">Pago</label><select id="' + id + 'p">' + (b.pago ? '' : '<option value="">—</option>') + opciones(CONF.pagos, b.pago) + '</select>' +
       '</div>' +
       '<div class="botones"><button class="primario">Guardar</button><button class="secundario">Descartar</button></div>';
     var burb = burbuja('bot', caja);
@@ -313,9 +284,11 @@
       if (!valor('f') || !Number(valor('m'))) { alertaCampos(); return; }
       btns[0].disabled = btns[1].disabled = true;
       btns[0].textContent = 'Guardando…';
+      var dest = valor('c'), enBalance = dest.indexOf('B|') === 0;
       servidor('guardarGasto', {
-        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), categoria: valor('c'), pago: valor('p'),
-        foto: extra && extra.foto, mime: extra && extra.mime, forzar: !!forzar
+        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), pago: valor('p'), moneda: b.moneda || 'CRC',
+        categoria: enBalance ? '' : dest.slice(2), rubro: enBalance ? dest.slice(2) : '',
+        forzar: !!forzar   // la foto no se guarda: solo se usa para leer los datos
       }).then(function (r) {
         if (r.duplicado) {
           btns[0].textContent = 'Guardar';
@@ -327,12 +300,15 @@
           });
           return;
         }
-        var resumen = esc(valor('d') || valor('c')) + ' · ' + colon(valor('m')) + ' · ' + fechaBonita(valor('f')) + ' · ' + esc(valor('p'));
+        var monto = b.moneda === 'USD' ? 'US$' + valor('m') : colon(valor('m'));
+        var resumen = r.destino === 'Balance'
+          ? 'Balance · ' + esc(r.rubro) + ' · ' + esc(r.mes) + ' · ' + monto
+          : esc(valor('d') || valor('c').slice(2)) + ' · ' + monto + ' · ' + fechaBonita(valor('f')) + ' · ' + esc(valor('p'));
         burb.innerHTML = '<span class="ok">✓ Guardado</span> · ' + resumen + ' <button type="button" class="deshacer">Deshacer</button>';
         burb.classList.add('simple');
         burb.querySelector('.deshacer').onclick = function () {
           this.disabled = true; this.textContent = 'Borrando…';
-          servidor('deshacerGasto', { fila: r.fila, marca: r.marca }).then(function () {
+          servidor('deshacerGasto', { destino: r.destino, fila: r.fila, marca: r.marca }).then(function () {
             burb.innerHTML = '<span class="d">Borrado · ' + resumen + '</span>';
             cargarTotal();
           }).catch(function (e) { burbuja('bot simple error', esc(e.message)); });
@@ -381,11 +357,11 @@
         var img = new Image();
         img.onerror = function () { mal(new Error('No pude abrir esa imagen.')); };
         img.onload = function () {
-          var max = 1600, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
+          var max = 1200, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
           var c = document.createElement('canvas');
           c.width = Math.round(w * k); c.height = Math.round(h * k);
           c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-          var url = c.toDataURL('image/jpeg', 0.8);
+          var url = c.toDataURL('image/jpeg', 0.7);
           ok({ url: url, base64: url.split(',')[1] });
         };
         img.src = lector.result;
@@ -420,9 +396,7 @@
   document.getElementById('foto').addEventListener('change', alElegirFotos);
   document.getElementById('galeria').addEventListener('change', alElegirFotos);
 
-  if (!window.API_URL || /PEGAR/.test(window.API_URL)) {
-    burbuja('bot simple error', 'Falta el enlace del motor en config.js.');
-  } else if (!CODIGO) { pedirCodigo(); } else { cargarInicio(); }
+  cargarInicio();
 </script>
 </body>
 </html>
