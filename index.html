@@ -80,7 +80,15 @@
   .acceso input { width: 100%; height: 48px; border: 1px solid var(--borde); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; margin: 6px 0 12px; background: var(--fondo); }
   .acceso .error { font-size: 14px; margin-bottom: 8px; }
   .destino { display: none; background: var(--verde-claro); color: var(--verde-osc); border: 1px solid #BFDCCB; border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
-  .destino.ingreso { background: #E8F0FB; color: #1F4E8C; border-color: #C5D6EE; }
+  .destino.ingreso { background: #FFF6E5; color: #7A4B00; border-color: #F1DDB4; }
+  .sello { display: flex; align-items: center; gap: 8px; margin: -12px -14px 12px; padding: 9px 14px; border-radius: 18px 18px 0 0;
+    font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--verde); }
+  .sello::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #9FE0BC; }
+  .sello.personal { background: #1F5FAD; }
+  .sello.personal::before { background: #A9CBF5; }
+  .tarjeta-personal .primario { background: #1F5FAD; }
+  .tarjeta-personal .campos select:focus, .tarjeta-personal .campos input:focus { outline-color: #1F5FAD; }
+  .chip-personal { display: inline-block; background: #E6EEF9; color: #1F5FAD; border-radius: 6px; padding: 0 6px; font-size: 12px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -91,7 +99,7 @@
 </header>
 
 <main id="chat" aria-live="polite">
-  <div class="bot simple">Escribe un gasto en cualquier orden (<i>“1/10 ferretería 4985 efectivo”</i>) o toca la cámara para fotografiar un recibo (o la galería para elegir varios). Si falta algo, te pregunto antes de guardar.</div>
+  <div class="bot simple">Escribe un gasto en cualquier orden (<i>“1/10 ferretería 4985 efectivo”</i>) o toca la cámara para fotografiar un recibo (o la galería para elegir varios). Para un gasto tuyo escribe <b>personal</b> (<i>“personal super 12 mil tarjeta”</i>). Si falta algo, te pregunto antes de guardar.</div>
 </main>
 
 <footer>
@@ -116,7 +124,7 @@
   var colon = function (n) { return '₡' + Math.round(n).toLocaleString('es-CR'); };
   var pendiente = null;   // gasto al que le falta un dato: { b, extra, campo, fin }
   var cola = Promise.resolve();
-  var LIMITE_FOTO_MS = 20000;   // si la IA no lee la foto en 20 s, se pregunta a mano
+  var LIMITE_FOTO_MS = 30000;   // si la IA no lee la foto en 30 s, se pregunta a mano
 
   function conLimite(promesa, ms) {
     return new Promise(function (ok, mal) {
@@ -228,6 +236,7 @@
     var caja = document.createElement('div');
     pendiente = { b: b, extra: extra, campo: campo, fin: fin, caja: caja };
     var hecho = [];
+    if (b.personal) hecho.push('<span class="chip-personal">Personal</span>');
     if (b.rubro) hecho.push('Balance: ' + esc(b.rubro.trim()));
     else if (b.descripcion) hecho.push(esc(b.descripcion));
     if (b.monto) hecho.push(b.moneda === 'USD' ? 'US$' + b.monto : colon(b.monto));
@@ -325,13 +334,15 @@
 
   /** Lista de destinos: categorías del día a día (Data) y filas del Balance. Valor "D|..." o "B|...". */
   function destinos(b) {
-    var sel = b.rubro ? 'B|' + b.rubro : 'D|' + b.categoria;
+    var sel = b.personal ? 'P|' + (b.categoriaPersonal || 'Otros') : b.rubro ? 'B|' + b.rubro : 'D|' + b.categoria;
+    var personales = CONF.categoriasPersonales || [];
     var op = function (v, txt) { return '<option value="' + esc(v) + '"' + (v === sel ? ' selected' : '') + '>' + esc(txt) + '</option>'; };
     var gastos = (CONF.rubros || []).filter(function (r) { return !r.ingreso; });
     var ingresos = (CONF.rubros || []).filter(function (r) { return r.ingreso; });
     return '<optgroup label="Compras del día">' + CONF.categorias.map(function (c) { return op('D|' + c, c); }).join('') + '</optgroup>' +
       (gastos.length ? '<optgroup label="Balance · gastos">' + gastos.map(function (r) { return op('B|' + r.nombre, r.nombre.trim()); }).join('') + '</optgroup>' : '') +
-      (ingresos.length ? '<optgroup label="Balance · entradas">' + ingresos.map(function (r) { return op('B|' + r.nombre, r.nombre.trim()); }).join('') + '</optgroup>' : '');
+      (ingresos.length ? '<optgroup label="Balance · entradas">' + ingresos.map(function (r) { return op('B|' + r.nombre, r.nombre.trim()); }).join('') + '</optgroup>' : '') +
+      (personales.length ? '<optgroup label="Gastos personales">' + personales.map(function (c) { return op('P|' + c, c); }).join('') + '</optgroup>' : '');
   }
 
   function tarjeta(b, extra, fin) {
@@ -339,7 +350,7 @@
     var opciones = function (lista, sel) { return lista.map(function (o) { return '<option' + (o === sel ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join(''); };
     var id = 'g' + Date.now() + Math.floor(Math.random() * 1000);
     caja.innerHTML =
-      '<div class="destino"></div><div style="margin-bottom:10px"><b class="titulo">¿Guardo este gasto?</b></div>' +
+      '<div class="sello"></div><div class="destino"></div><div style="margin-bottom:10px"><b class="titulo">¿Guardo este gasto?</b></div>' +
       '<div class="campos">' +
       '<label for="' + id + 'f" class="fila-fecha">Fecha</label><input id="' + id + 'f" class="fila-fecha" type="date" value="' + esc(b.fecha || (b.rubro && b.mes ? CONF.hoy : '')) + '">' +
       '<label for="' + id + 'm">Monto ' + (b.moneda === 'USD' ? 'US$' : '₡') + '</label><input id="' + id + 'm" class="monto" type="number" inputmode="numeric" value="' + esc(b.monto) + '">' +
@@ -360,8 +371,13 @@
     var selMes = caja.querySelector('#' + id + 'x'), mesTocado = false;
     selMes.onchange = function () { mesTocado = true; mostrarPago(); };
     var mesAnterior = function (rubro) { return (CONF.rubros || []).some(function (r) { return r.nombre === rubro && r.mesAnterior; }); };
+    var sello = caja.querySelector('.sello');
     var mostrarPago = function () {
       var balance = selDestino.value.indexOf('B|') === 0;
+      var personal = selDestino.value.indexOf('P|') === 0;
+      sello.textContent = personal ? 'Gastos personales' : 'Vila Paraíso';
+      sello.className = 'sello' + (personal ? ' personal' : '');
+      burb.classList.toggle('tarjeta-personal', personal);
       caja.querySelectorAll('.fila-pago').forEach(function (el) { el.style.display = balance ? 'none' : ''; });
       caja.querySelectorAll('.fila-mes').forEach(function (el) { el.style.display = balance ? '' : 'none'; });
       caja.querySelectorAll('.fila-fecha').forEach(function (el) { el.style.display = balance ? 'none' : ''; });
@@ -380,7 +396,7 @@
         titulo.textContent = ingreso ? '¿Guardo esta entrada?' : '¿Guardo este gasto fijo?';
       } else {
         aviso.style.display = 'none';
-        titulo.textContent = '¿Guardo este gasto?';
+        titulo.textContent = personal ? '¿Guardo este gasto personal?' : '¿Guardo este gasto?';
       }
     };
     selDestino.onchange = mostrarPago;
@@ -391,12 +407,12 @@
 
     function guardar(forzar) {
       if (!valor('f') || !Number(valor('m'))) { alertaCampos(); return; }
-      if (valor('c').indexOf('D|') === 0 && !valor('p')) { alertaCampos('Falta el tipo de pago.'); return; }
+      if (valor('c').indexOf('B|') !== 0 && !valor('p')) { alertaCampos('Falta el tipo de pago.'); return; }
       btns[0].disabled = btns[1].disabled = true;
       btns[0].textContent = 'Guardando…';
-      var dest = valor('c'), enBalance = dest.indexOf('B|') === 0;
+      var dest = valor('c'), enBalance = dest.indexOf('B|') === 0, enPersonal = dest.indexOf('P|') === 0;
       servidor('guardarGasto', {
-        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), pago: enBalance ? '' : valor('p'), moneda: b.moneda || 'CRC',
+        fecha: valor('f'), monto: valor('m'), descripcion: valor('d'), pago: enBalance ? '' : valor('p'), moneda: b.moneda || 'CRC', personal: enPersonal,
         categoria: enBalance ? '' : dest.slice(2), rubro: enBalance ? dest.slice(2) : '', mes: enBalance ? Number(valor('x')) : 0,
         forzar: !!forzar   // la foto no se guarda: solo se usa para leer los datos
       }).then(function (r) {
@@ -413,6 +429,8 @@
         var monto = b.moneda === 'USD' ? 'US$' + valor('m') : colon(valor('m'));
         var resumen = r.destino === 'Balance'
           ? 'Balance · ' + esc(r.rubro) + ' · ' + esc(r.mes) + ' · ' + monto
+          : r.destino === 'Personal'
+          ? '<span class="chip-personal">Personal</span> ' + esc(valor('d') || r.categoria) + ' · ' + esc(r.categoria) + ' · ' + monto + ' · ' + fechaBonita(valor('f')) + ' · ' + esc(valor('p'))
           : esc(valor('d') || valor('c').slice(2)) + ' · ' + monto + ' · ' + fechaBonita(valor('f')) + ' · ' + esc(valor('p'));
         burb.innerHTML = '<span class="ok">✓ Guardado</span> · ' + resumen + ' <button type="button" class="deshacer">Deshacer</button>';
         burb.classList.add('simple');
