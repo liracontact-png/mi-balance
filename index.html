@@ -89,12 +89,96 @@
   .tarjeta-personal .primario { background: #1F5FAD; }
   .tarjeta-personal .campos select:focus, .tarjeta-personal .campos input:focus { outline-color: #1F5FAD; }
   .chip-personal { display: inline-block; background: #E6EEF9; color: #1F5FAD; border-radius: 6px; padding: 0 6px; font-size: 12px; font-weight: 700; }
+  /* ---------- Inicio, inventario y pedidos ---------- */
+  .titulo-btn { background: none; border: none; color: #fff; padding: 0; min-height: 0; display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 10px; text-align: left; }
+  .titulo-btn h1 { margin: 0; }
+  .titulo-btn svg { opacity: .7; }
+  .vista { position: fixed; inset: 0; z-index: 5; background: var(--fondo); display: flex; flex-direction: column; }
+  .vista[hidden] { display: none; }
+  .v-top { display: flex; align-items: center; gap: 4px; background: #fff; border-bottom: 1px solid var(--borde); padding: calc(8px + env(safe-area-inset-top)) 12px 8px 4px; min-height: 60px; }
+  .v-top .v-tit { flex: 1; min-width: 0; }
+  .v-top h2 { margin: 0; font-size: 19px; }
+  .v-top p { margin: 0; font-size: 12px; color: var(--gris); }
+  .v-atras { width: 44px; height: 44px; background: none; border: none; display: flex; align-items: center; justify-content: center; padding: 0; color: var(--tinta); flex-shrink: 0; }
+  .v-cuerpo { flex: 1; overflow-y: auto; padding: 16px 16px 28px; display: flex; flex-direction: column; gap: 12px; }
+  .v-cuerpo > * { flex-shrink: 0; }
+  .v-pie { background: #fff; border-top: 1px solid var(--borde); padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; }
+  .v-pie button, .v-pie a { flex: 1; }
+  .v-cuerpo h3 { margin: 6px 0 0; font-size: 15px; }
+  .nota { margin: 0; font-size: 13px; color: var(--gris); line-height: 1.45; }
+  .tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 18px; overflow: hidden; }
+  .fila { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: none; border-bottom: 1px solid #EDF1EF; background: none; width: 100%; text-align: left; font: inherit; color: inherit; min-height: 0; border-radius: 0; font-weight: 400; }
+  .tarjeta > .fila:last-child { border-bottom: none; }
+  .crece { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .fuerte { font-weight: 600; font-size: 15px; }
+  .sub { font-size: 12px; color: var(--gris); }
+  .grupo { padding: 10px 14px 6px; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--gris); background: #EDF1EF; }
+  .etq { align-self: flex-start; display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+  .etq.ok { background: var(--verde-claro); color: var(--verde-osc); } .etq.av { background: var(--ambar-fondo); color: var(--ambar); } .etq.mal { background: #FBE7E4; color: #9B2C1F; } .etq.gr { background: #EDF1EF; color: var(--gris); }
+  .mesnav { display: flex; align-items: center; justify-content: space-between; }
+  .mesnav b { font-size: 17px; text-transform: capitalize; }
+  .mesnav button { width: 44px; background: #fff; border: 1px solid var(--borde); color: var(--tinta); font-size: 20px; padding: 0; }
+  .heroe { background: var(--tinta); color: #fff; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .heroe .lbl { font-size: 13px; color: #B9C7BF; }
+  .heroe .grande { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 500; color: #8FE0B3; letter-spacing: -.02em; }
+  .heroe .grande.neg { color: #F2A69B; }
+  .heroe .dos { display: flex; justify-content: space-between; gap: 12px; }
+  .heroe .dos b { display: block; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 16px; }
+  .barra { height: 8px; border-radius: 4px; background: #22302A; overflow: hidden; } .barra i { display: block; height: 100%; background: #F2B66D; border-radius: 4px; }
+  .tres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .tres > div { background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tres b { font-size: 16px; font-family: 'DM Mono', monospace; font-weight: 500; overflow-wrap: anywhere; } .tres span { font-size: 11px; color: var(--gris); }
+  .neg { color: #9B2C1F; }
+  .mini { height: 5px; border-radius: 3px; background: #EDF1EF; margin-top: 4px; } .mini i { display: block; height: 100%; border-radius: 3px; background: var(--verde); } .mini i.bajo { background: #9B2C1F; }
+  .areas-tab { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #EDF1EF; border-radius: 12px; }
+  .areas-tab button { min-height: 38px; border: none; border-radius: 9px; background: transparent; font-size: 13px; color: var(--gris); padding: 0; }
+  .areas-tab button[aria-pressed="true"] { background: #fff; color: var(--tinta); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .cnt { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; min-width: 56px; }
+  .cnt b { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; } .cnt span { font-size: 11px; font-weight: 600; color: var(--gris); }
+  .cnt.bajo b, .cnt.bajo span { color: #9B2C1F; }
+  .area-btn { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 20px; border: 1px solid var(--borde); background: #fff; text-align: left; width: 100%; min-height: 92px; color: var(--tinta); font-weight: 400; }
+  .area-btn .ic { width: 52px; height: 52px; border-radius: 16px; background: var(--verde-claro); color: var(--verde-osc); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .area-btn b { font-size: 20px; }
+  .accion3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 14px 14px; }
+  .accion3 button { font-size: 14px; padding: 0 6px; }
+  .chk { width: 22px; height: 22px; border-radius: 11px; border: 2px solid var(--borde); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: transparent; }
+  .hecho .chk { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .paso { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .paso button { width: 50px; height: 50px; min-height: 50px; border-radius: 14px; border: none; background: var(--verde-claro); color: var(--verde-osc); font-size: 26px; padding: 0; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .paso .val { min-width: 52px; text-align: center; font-family: 'DM Mono', monospace; font-size: 21px; }
+  .paso .val.vacio { color: var(--gris); }
+  .paso.chico button { width: 36px; height: 36px; min-height: 36px; font-size: 19px; border-radius: 10px; }
+  .paso.chico .val { min-width: 30px; font-size: 16px; }
+  .val.botellas { min-width: 90px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--verde-osc); font-family: 'DM Sans', sans-serif; }
+  .val.botellas.vacio { color: var(--gris); }
+  .bt-fila { display: flex; align-items: flex-end; justify-content: center; gap: 3px; font-size: 13px; font-weight: 700; }
+  .bt-cap { font-size: 11px; font-weight: 600; color: var(--gris); white-space: nowrap; min-height: 14px; }
+  .seg { display: flex; gap: 6px; flex-shrink: 0; }
+  .seg button { height: 50px; min-width: 70px; padding: 0 10px; border-radius: 14px; border: 1px solid var(--borde); background: #fff; color: var(--gris); font-size: 15px; }
+  .seg button[aria-pressed="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .seg button.no[aria-pressed="true"] { background: #B3261E; border-color: #B3261E; }
+  .primario.incompleto { background: #EDF1EF; color: var(--gris); border: 1px solid var(--borde); }
+  .fila.destello { animation: destello 1.4s ease-out; } @keyframes destello { 0%, 40% { background: var(--ambar-fondo); } 100% { background: transparent; } }
+  .wa { background: #1DAA61; color: #fff; border: none; display: flex; align-items: center; justify-content: center; text-decoration: none; min-height: 44px; border-radius: 12px; font-weight: 600; font-size: 15px; }
+  .ord { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; padding: 6px 8px; border-radius: 12px; background: #EDF1EF; }
+  .hoja-velo { position: fixed; inset: 0; z-index: 20; background: rgba(20, 32, 26, .5); display: flex; align-items: flex-end; }
+  .hoja { width: 100%; max-height: 90%; overflow-y: auto; background: #fff; border-radius: 22px 22px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 12px; }
+  .hoja h2 { margin: 0; font-size: 18px; }
+  .hoja > button { flex-shrink: 0; }
+  .campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .campo[hidden] { display: none; }
+  .campo label { font-size: 12px; color: var(--gris); font-weight: 500; }
+  .campo input, .campo select { height: 46px; border: 1px solid var(--borde); border-radius: 10px; padding: 0 12px; background: var(--fondo); font: inherit; font-size: 16px; color: var(--tinta); width: 100%; }
+  .rejilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+  .burbuja-wa { background: #EFE7DE; border-radius: 16px; padding: 14px; } .burbuja-wa div { background: #D9FDD3; border-radius: 12px 12px 4px 12px; padding: 10px 12px; white-space: pre-wrap; font-size: 14px; line-height: 1.45; margin-left: 10%; }
+  .tostada { position: fixed; left: 16px; right: 16px; bottom: calc(90px + env(safe-area-inset-bottom)); z-index: 30; background: var(--tinta); color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  .cargando { color: var(--gris); text-align: center; padding: 40px 0; }
 </style>
 </head>
 <body>
 <header>
   <p class="mes" id="mes">&nbsp;</p>
-  <h1>Vila Paraiso</h1>
+  <button type="button" class="titulo-btn" id="abrirInicio" aria-label="Abrir resumen del mes e inventario"><h1>Vila Paraiso</h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
   <div class="total"><span>Gastos del mes</span><b id="totalMes">—</b></div>
 </header>
 
@@ -117,6 +201,8 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
   </button>
 </footer>
+
+<section id="vista" class="vista" hidden></section>
 
 <script>
   var CONF = { categorias: [], pagos: [], hoy: '' };
@@ -523,6 +609,438 @@
   }
   document.getElementById('foto').addEventListener('change', alElegirFotos);
   document.getElementById('galeria').addEventListener('change', alElegirFotos);
+
+  /* =================== INICIO, INVENTARIO Y PEDIDOS =================== */
+  /* Se abre tocando "Vila Paraiso" arriba. El chat sigue siendo la pantalla principal. */
+
+  var vista = document.getElementById('vista');
+  var INV = null, RESUMEN = {}, pila = [], pedidoExtra = {}, enviados = {};
+  var QUIEN = 'Rodrigo';
+  var SVG = function (p, t) { return '<svg width="' + (t || 22) + '" height="' + (t || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+  var IC = {
+    atras: SVG('<path d="M15 5l-7 7 7 7"/>'), sig: SVG('<path d="M9 5l7 7-7 7"/>', 18),
+    check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>',
+    Cocina: SVG('<path d="M6 13a4 4 0 1 1 2-7.5A4.5 4.5 0 0 1 16 5a4 4 0 1 1 2 8v6H6z"/><path d="M6 16h12"/>', 26),
+    Bodega: SVG('<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>', 26),
+    Licores: SVG('<path d="M10 2h4v4l2 3v12a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9l2-3z"/><path d="M8 13h8"/>', 26),
+    Bebidas: SVG('<path d="M6 4h12l-1.5 16a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1z"/><path d="M6.5 9h11"/>', 26)
+  };
+
+  function num(v) { return v == null ? '—' : String(Math.round(v * 100) / 100).replace('.', ','); }
+  function colonS(n) { return (n < 0 ? '−' : '') + colon(Math.abs(n || 0)); }
+  function plural(ph) { var w = String(ph).split(' '), f = w[0]; w[0] = /[aeiouáéíóú]$/i.test(f) ? f + 's' : /ón$/.test(f) ? f.slice(0, -2) + 'ones' : f + 'es'; return w.join(' '); }
+  function pideTxt(it, q) { return q === 1 ? it.pide : plural(it.pide); }
+  function esBajo(it, c) { return c != null && c <= it.min; }
+  function sugerido(it, c) { return c == null || c > it.min ? 0 : Math.max(1, Math.ceil((it.max - c) / it.pack)); }
+  function aPedir(it) { return pedidoExtra[it.id] != null ? pedidoExtra[it.id] : sugerido(it, it.hay); }
+  function delArea(a) { return INV.items.filter(function (it) { return it.area === a; }); }
+  function provDe(nombre) { return INV.proveedores.filter(function (p) { return p.nombre === nombre; })[0] || { nombre: nombre || 'Sin proveedor', wa: '', min: 0, entrega: '', tipo: 'WhatsApp' }; }
+  function fmtB(v) { if (v == null) return '—'; var w = Math.floor(v), q = Math.round((v - w) * 4), fr = ['', '¼', '½', '¾'][q]; return w ? w + (fr ? ' ' + fr : '') : (fr || '0'); }
+  function verValor(it, c) { return it.como === 'Hay o falta' ? (c == null ? '—' : c ? 'Hay' : 'Falta') : it.como === 'Botellas' ? fmtB(c) : num(c); }
+  function botellaSVG(f) {
+    var h = 16.5 * f;
+    return '<svg width="18" height="34" viewBox="0 0 16 32" aria-hidden="true">' + (f > 0 ? '<rect x="3.2" y="' + (29.6 - h).toFixed(2) + '" width="9.6" height="' + h.toFixed(2) + '" rx="1" fill="#D49433"/>' : '') +
+      '<path d="M6 1h4v6l3 3.5c.6.7 1 1.6 1 2.5V29a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V13c0-.9.4-1.8 1-2.5L6 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  }
+  function botellasHTML(v) {
+    var h = '';
+    if (v == null || v === 0) h = botellaSVG(0);
+    else {
+      var w = Math.floor(v), p = Math.round((v - w) * 4) / 4;
+      if (w > 2) h += botellaSVG(1) + '<span>×' + w + '</span>'; else for (var k = 0; k < w; k++) h += botellaSVG(1);
+      if (p > 0) h += botellaSVG(p);
+    }
+    var cap = v == null ? '' : v === 0 ? 'No hay' : fmtB(v) + (v <= 1 ? ' botella' : ' botellas');
+    return '<span class="bt-fila">' + h + '</span><span class="bt-cap">' + cap + '</span>';
+  }
+  function tostada(t) {
+    var e = document.querySelector('.tostada');
+    if (!e) { e = document.createElement('div'); e.className = 'tostada'; e.setAttribute('role', 'status'); document.body.appendChild(e); }
+    e.textContent = t; e.hidden = false; clearTimeout(tostada.t); tostada.t = setTimeout(function () { e.hidden = true; }, 2600);
+  }
+
+  /* ---------- Navegación (el botón Atrás del teléfono también funciona) ---------- */
+  function abrir(v, a) { pila.push({ v: v, a: a || {} }); try { history.pushState({ vista: pila.length }, ''); } catch (e) {} pintar(true); }
+  function reemplazar(v, a) { pila[pila.length - 1] = { v: v, a: a || {} }; pintar(true); }
+  function atras() { if (pila.length) history.back(); }
+  window.addEventListener('popstate', function () {
+    if (document.querySelector('.hoja-velo')) { cerrarHoja(); try { history.pushState({ vista: pila.length }, ''); } catch (e) {} return; }
+    if (pila.length) { pila.pop(); pintar(true); }
+  });
+  function pintar(arriba) {
+    if (!pila.length) { vista.hidden = true; vista.innerHTML = ''; cargarTotal(); return; }
+    vista.hidden = false;
+    var cuerpo = vista.querySelector('.v-cuerpo'), y = cuerpo ? cuerpo.scrollTop : 0;
+    var t = pila[pila.length - 1];
+    VISTAS[t.v](t.a);
+    var nuevo = vista.querySelector('.v-cuerpo');
+    if (nuevo) nuevo.scrollTop = arriba ? 0 : y;
+  }
+  function marco(titulo, sub, cuerpo, pie, derecha) {
+    vista.innerHTML = '<div class="v-top"><button type="button" class="v-atras" data-v="atras" aria-label="Volver">' + IC.atras + '</button>' +
+      '<div class="v-tit"><h2>' + titulo + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' + (derecha || '') + '</div>' +
+      '<div class="v-cuerpo">' + cuerpo + '</div>' + (pie ? '<div class="v-pie">' + pie + '</div>' : '');
+  }
+  function cargando(titulo, txt) { marco(titulo, '', '<div class="cargando">' + (txt || 'Cargando…') + '</div>'); }
+  function falla(titulo, e) { marco(titulo, '', '<div class="aviso">' + esc(e.message) + '</div><button type="button" class="secundario" data-v="reintentar">Reintentar</button>'); }
+  function necesitaInv(titulo) {
+    if (INV) return false;
+    cargando(titulo, 'Cargando inventario…');
+    servidor('getInventario').then(function (r) { INV = r; pintar(); }).catch(function (e) { falla(titulo, e); });
+    return true;
+  }
+
+  /* ---------- Hojas (ventanas que suben desde abajo) ---------- */
+  function abrirHoja(html) {
+    cerrarHoja();
+    var velo = document.createElement('div');
+    velo.className = 'hoja-velo';
+    velo.innerHTML = '<div class="hoja" role="dialog" aria-modal="true">' + html + '</div>';
+    velo.addEventListener('click', function (e) { if (e.target === velo) cerrarHoja(); });
+    velo.addEventListener('click', alTocar);
+    document.body.appendChild(velo);
+    return velo.querySelector('.hoja');
+  }
+  function cerrarHoja() { var v = document.querySelector('.hoja-velo'); if (v) v.remove(); }
+
+  /* ---------- Pantalla de inicio: números del mes ---------- */
+  var VISTAS = {};
+  VISTAS.resumen = function (a) {
+    var hoyMes = new Date().getMonth() + 1, mes = a.mes || hoyMes, r = RESUMEN[mes];
+    if (!INV) servidor('getInventario').then(function (x) { INV = x; if (pila.length && pila[pila.length - 1].v === 'resumen') pintar(); }).catch(function () {});
+    if (!r) {
+      cargando('Vila Paraíso', 'Cargando los números del mes…');
+      servidor('getResumen', { mes: mes }).then(function (x) { RESUMEN[x.mes] = x; if (x.mes !== mes) RESUMEN[mes] = x; pintar(); })
+        .catch(function (e) { falla('Vila Paraíso', e); });
+      return;
+    }
+    var pct = r.entradas ? Math.min(100, Math.round(r.gastos / r.entradas * 100)) : 100;
+    var maxG = Math.max.apply(null, r.grupos.map(function (g) { return g.monto; }).concat([1]));
+    var inv = '';
+    if (INV) {
+      var bajos = INV.items.filter(function (it) { return esBajo(it, it.hay); }).length;
+      var fechas = INV.items.map(function (it) { return it.fecha; }).filter(Boolean);
+      inv = '<div class="tarjeta"><div class="fila" style="border:0"><div class="crece"><span class="fuerte">Inventario</span>' +
+        '<span class="sub">' + (bajos ? '<b class="neg">' + bajos + ' bajo el mínimo</b>' : 'Nada bajo el mínimo') + ' · ' + INV.items.length + ' productos</span></div></div>' +
+        '<div class="accion3"><button type="button" class="primario" data-v="ir" data-a="contarAreas">Contar</button><button type="button" class="secundario" data-v="ir" data-a="inventario">Ver</button><button type="button" class="secundario" data-v="ir" data-a="pedidos">Pedidos</button></div></div>';
+    } else inv = '<div class="tarjeta"><div class="fila" style="border:0"><span class="sub">Cargando inventario…</span></div></div>';
+    marco('Vila Paraíso', 'Resumen del mes',
+      '<div class="mesnav"><button type="button" data-v="mes" data-d="-1" aria-label="Mes anterior"' + (r.mes <= 1 ? ' disabled' : '') + '>‹</button><b>' + esc(r.mesNombre) + ' ' + esc(r.anio) + '</b>' +
+      '<button type="button" data-v="mes" data-d="1" aria-label="Mes siguiente"' + (r.mes >= r.meses ? ' disabled' : '') + '>›</button></div>' +
+      '<div class="heroe"><span class="lbl">Resultado del restaurante</span><span class="grande' + (r.balance < 0 ? ' neg' : '') + '">' + colonS(r.balance) + '</span>' +
+      '<div class="barra"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="dos"><div><span class="lbl">Entradas</span><b>' + colon(r.entradas) + '</b></div><div style="text-align:right"><span class="lbl">Gastos</span><b>' + colon(r.gastos) + '</b></div></div>' +
+      (r.anterior ? '<span class="lbl">Mes anterior: ' + colonS(r.anterior.balance) + '</span>' : '') + '</div>' +
+      '<div class="tres"><div><b>' + (r.comidaPct > 0 && r.comidaPct <= 100 ? num(r.comidaPct) + '%' : '—') + '</b><span>costo de comida</span></div><div><b>' + colon(r.personales) + '</b><span>gastos personales</span></div>' +
+      '<div><b class="' + (r.balanceReal < 0 ? 'neg' : '') + '">' + colonS(r.balanceReal) + '</b><span>balance real</span></div></div>' +
+      inv +
+      '<h3>Gastos por grupo</h3><div class="tarjeta">' + r.grupos.filter(function (g) { return g.monto; }).map(function (g) {
+        return '<div class="fila"><div class="crece"><span class="fuerte" style="font-size:14px">' + esc(g.nombre) + '</span><div class="mini"><i style="width:' + Math.round(g.monto / maxG * 100) + '%"></i></div></div><span style="font-family:\'DM Mono\',monospace">' + colon(g.monto) + '</span></div>';
+      }).join('') + '</div>' +
+      '<p class="nota">Costo de comida = insumos alimenticios + carnes + feria, sobre las entradas del mes. Sale “—” mientras las entradas del mes no estén cargadas.</p>');
+  };
+
+  /* ---------- Inventario ---------- */
+  function conGrupos(lista, fila) {
+    var g = null;
+    return lista.map(function (it) {
+      var h = '';
+      if (it.grupo && it.grupo !== g) { g = it.grupo; h = '<div class="grupo">' + esc(g) + '</div>'; }
+      return h + fila(it);
+    }).join('');
+  }
+  VISTAS.inventario = function (a) {
+    if (necesitaInv('Inventario')) return;
+    var area = a.area || 'Cocina', its = delArea(area);
+    var bajos = its.filter(function (it) { return esBajo(it, it.hay); }).length;
+    var fechas = its.map(function (it) { return it.fecha; }).filter(Boolean).sort();
+    marco('Inventario', 'Lo que hay según el último conteo',
+      '<div class="areas-tab" role="group" aria-label="Área">' + INV.areas.map(function (x) { return '<button type="button" data-v="area" data-a="' + x + '" aria-pressed="' + (x === area) + '">' + x + '</button>'; }).join('') + '</div>' +
+      '<div class="tres"><div><b>' + its.length + '</b><span>productos</span></div><div><b class="' + (bajos ? 'neg' : '') + '">' + bajos + '</b><span>bajo el mínimo</span></div><div><b>' + (fechas.length ? fechas[fechas.length - 1] : '—') + '</b><span>último conteo</span></div></div>' +
+      (its.length ? '<div class="tarjeta">' + conGrupos(its, function (it) {
+        var b = esBajo(it, it.hay), hf = it.como === 'Hay o falta', sinMin = !it.min && !hf;
+        return '<button type="button" class="fila" data-v="producto" data-a="' + esc(it.id) + '"><div class="crece"><span class="fuerte">' + esc(it.nombre) + '</span>' +
+          '<span class="sub">' + (hf ? 'Hay o falta' : sinMin ? esc(it.unidad) : 'Mín ' + num(it.min) + ' · máx ' + num(it.max) + ' ' + esc(it.unidad)) + ' · ' + esc(it.prov || 'Sin proveedor') + '</span>' +
+          (sinMin ? '<span class="etq av">Falta el mínimo</span>' : it.revisar ? '<span class="etq av">Revisar</span>' : '') +
+          (hf || !it.max ? '' : '<div class="mini"><i class="' + (b ? 'bajo' : '') + '" style="width:' + (it.hay == null ? 0 : Math.min(100, it.hay / it.max * 100)) + '%"></i></div>') + '</div>' +
+          '<div class="cnt' + (b ? ' bajo' : '') + '"><b' + (hf ? ' style="font-size:16px"' : '') + '>' + verValor(it, it.hay) + '</b><span>' + (it.hay == null ? 'sin conteo' : b ? (hf ? 'comprar' : 'bajo mínimo') : hf ? '' : esc(it.unidad)) + '</span></div></button>';
+      }) + '</div>' : '<p class="nota">Todavía no hay productos en ' + area + '. Agrégalos con “+ Agregar”.</p>') +
+      '<p class="nota">Toca un producto para cambiar mínimo, máximo, proveedor o presentación. También puedes editarlos en la pestaña “Inventario” de la hoja.</p>' +
+      '<button type="button" class="secundario" data-v="ir" data-a="proveedores">Proveedores</button>',
+      its.length ? '<button type="button" class="primario" data-v="contar" data-a="' + area + '">Contar ' + area + '</button>' : '',
+      '<button type="button" class="primario" style="padding:0 14px" data-v="producto" data-a="">+ Agregar</button>');
+  };
+
+  function hojaProducto(id) {
+    var it = INV.items.filter(function (x) { return x.id === id; })[0];
+    var area = (pila[pila.length - 1].a.area) || 'Cocina';
+    if (!it) it = { id: '', nombre: '', area: area, grupo: '', como: area === 'Licores' ? 'Botellas' : 'Cantidad', unidad: area === 'Licores' ? 'botellas' : 'unidades', paso: area === 'Licores' ? 0.25 : 1, min: '', max: '', prov: '', pide: 'unidad', pack: 1, precio: '' };
+    var op = function (v, t, s) { return '<option value="' + esc(v) + '"' + (String(v) === String(s) ? ' selected' : '') + '>' + esc(t) + '</option>'; };
+    var grupos = INV.items.map(function (x) { return x.grupo; }).filter(function (g, i, arr) { return g && arr.indexOf(g) === i; });
+    var h = abrirHoja('<h2>' + (it.id ? 'Editar producto' : 'Nuevo producto') + '</h2>' +
+      '<div class="campo"><label for="p-nombre">Nombre</label><input id="p-nombre" value="' + esc(it.nombre) + '"></div>' +
+      '<div class="campo"><label for="p-como">Cómo se cuenta</label><select id="p-como">' + op('Cantidad', 'Cantidad (− y +)', it.como) + op('Botellas', 'Botellas por cuartos (ícono)', it.como) + op('Hay o falta', 'Hay o falta', it.como) + '</select></div>' +
+      '<div class="rejilla"><div class="campo"><label for="p-area">Área</label><select id="p-area">' + INV.areas.map(function (x) { return op(x, x, it.area); }).join('') + '</select></div>' +
+      '<div class="campo"><label for="p-grupo">Grupo (opcional)</label><input id="p-grupo" list="p-grupos" value="' + esc(it.grupo) + '"><datalist id="p-grupos">' + grupos.map(function (g) { return '<option value="' + esc(g) + '">'; }).join('') + '</datalist></div>' +
+      '<div class="campo solo-cant"><label for="p-unidad">Se cuenta en</label><input id="p-unidad" value="' + esc(it.unidad) + '"></div>' +
+      '<div class="campo solo-cant"><label for="p-paso">Se cuenta de a</label><select id="p-paso">' + op(1, '1 en 1', it.paso) + op(0.5, '0,5 (media)', it.paso) + op(0.25, '0,25 (cuarto)', it.paso) + '</select></div>' +
+      '<div class="campo sin-hf"><label for="p-min">Mínimo</label><input id="p-min" inputmode="decimal" value="' + esc(it.min) + '"></div>' +
+      '<div class="campo sin-hf"><label for="p-max">Pedir hasta (máximo)</label><input id="p-max" inputmode="decimal" value="' + esc(it.max) + '"></div>' +
+      '<div class="campo"><label for="p-prov">Proveedor</label><select id="p-prov">' + op('', 'Sin proveedor', it.prov) + INV.proveedores.map(function (p) { return op(p.nombre, p.nombre, it.prov); }).join('') + '</select></div>' +
+      '<div class="campo solo-cant"><label for="p-pide">Se pide por</label><input id="p-pide" value="' + esc(it.pide) + '" placeholder="paca de 12"></div>' +
+      '<div class="campo solo-cant"><label for="p-pack">Unidades en cada una</label><input id="p-pack" inputmode="numeric" value="' + esc(it.pack) + '"></div>' +
+      '<div class="campo sin-hf"><label for="p-precio">Precio (₡, opcional)</label><input id="p-precio" inputmode="numeric" value="' + esc(it.precio) + '"></div></div>' +
+      '<div class="aviso" id="p-error" hidden></div>' +
+      '<div class="botones">' + (it.id ? '<button type="button" class="secundario" data-v="borrar-prod" data-a="' + esc(it.id) + '" style="flex:0 0 auto;color:var(--rojo);padding:0 14px">Eliminar</button>' : '') +
+      '<button type="button" class="secundario" data-v="cerrar">Cancelar</button><button type="button" class="primario" data-v="guardar-prod" data-a="' + esc(it.id) + '">Guardar</button></div>');
+    var ajustar = function () {
+      var c = h.querySelector('#p-como').value;
+      h.querySelectorAll('.solo-cant').forEach(function (e) { e.hidden = c !== 'Cantidad'; });
+      h.querySelectorAll('.sin-hf').forEach(function (e) { e.hidden = c === 'Hay o falta'; });
+    };
+    h.querySelector('#p-como').onchange = ajustar;
+    ajustar();
+  }
+  function guardarProducto(id, btn) {
+    var h = document.querySelector('.hoja'), v = function (k) { return h.querySelector('#p-' + k).value.trim(); };
+    var err = h.querySelector('#p-error');
+    var como = v('como');
+    if (!v('nombre')) { err.textContent = 'Falta el nombre.'; err.hidden = false; return; }
+    if (como !== 'Hay o falta' && (v('min') === '' || v('max') === '')) { err.textContent = 'Pon el mínimo y el máximo (pueden ser 0).'; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    servidor('guardarProducto', { id: id, nombre: v('nombre'), area: v('area'), grupo: v('grupo'), como: como, unidad: v('unidad'), paso: v('paso'),
+      min: v('min'), max: v('max'), prov: v('prov'), pide: v('pide'), pack: v('pack'), precio: v('precio') })
+      .then(function (r) { INV = r.inventario; cerrarHoja(); if (pila[pila.length - 1].v === 'inventario') pila[pila.length - 1].a.area = v('area'); pintar(); tostada(id ? 'Producto actualizado' : 'Producto agregado'); })
+      .catch(function (e) { btn.disabled = false; btn.textContent = 'Guardar'; err.textContent = e.message; err.hidden = false; });
+  }
+
+  /* ---------- Contar ---------- */
+  function corte() { var d = new Date(), c = new Date(d); c.setHours(1, 0, 0, 0); if (d < c) c.setDate(c.getDate() - 1); return c.getTime(); }
+  function leerBorrador(area) {   // conteo a medio hacer: queda en este teléfono hasta enviarlo (se borra a la 1 a. m.)
+    try { var b = JSON.parse(localStorage.getItem('inv_borrador_' + area) || 'null'); if (b && b.t >= corte()) return b; } catch (e) {}
+    return { t: 0, c: {} };
+  }
+  function guardarBorrador(area, b) { try { if (!b.t) b.t = Date.now(); localStorage.setItem('inv_borrador_' + area, JSON.stringify(b)); } catch (e) {} }
+  function borrarBorrador(area) { try { localStorage.removeItem('inv_borrador_' + area); } catch (e) {} }
+
+  VISTAS.contarAreas = function () {
+    if (necesitaInv('Contar')) return;
+    var f = new Date().toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long' });
+    marco('Contar', f.charAt(0).toUpperCase() + f.slice(1),
+      INV.areas.filter(function (x) { return delArea(x).length; }).map(function (x) {
+        var n = delArea(x).length, b = leerBorrador(x), hechos = delArea(x).filter(function (it) { return b.c[it.id] != null; }).length;
+        return '<button type="button" class="area-btn" data-v="contar" data-a="' + x + '"><span class="ic">' + IC[x] + '</span><span class="crece">' +
+          (hechos ? '<span class="etq av">Sin terminar</span>' : '') + '<b>' + x + '</b><span class="sub">' + (hechos ? hechos + ' de ' + n + ' contados' : n + ' productos') + '</span></span>' + IC.sig + '</button>';
+      }).join('') + '<p class="nota">Cuenta lo que ves y envía al terminar. Lo que vas contando se guarda en este teléfono por si sales.</p>');
+  };
+
+  function filaContar(it, c) {
+    var hecho = c != null ? ' hecho' : '';
+    if (it.como === 'Hay o falta') {
+      return '<div class="fila' + hecho + '" id="r-' + esc(it.id) + '"><span class="chk">' + IC.check + '</span><div class="crece"><span class="fuerte">' + esc(it.nombre) + '</span><span class="sub">¿Hay?</span></div>' +
+        '<div class="seg"><button type="button" data-v="hf" data-a="' + esc(it.id) + '" data-n="1" aria-pressed="' + (c === 1) + '">Hay</button><button type="button" class="no" data-v="hf" data-a="' + esc(it.id) + '" data-n="0" aria-pressed="' + (c === 0) + '">Falta</button></div></div>';
+    }
+    var val = it.como === 'Botellas'
+      ? '<span class="val botellas' + (c == null ? ' vacio' : '') + '" id="v-' + esc(it.id) + '">' + botellasHTML(c) + '</span>'
+      : '<span class="val' + (c == null ? ' vacio' : '') + '" id="v-' + esc(it.id) + '">' + num(c) + '</span>';
+    return '<div class="fila' + hecho + '" id="r-' + esc(it.id) + '"><span class="chk">' + IC.check + '</span><div class="crece"><span class="fuerte">' + esc(it.nombre) + '</span><span class="sub">' + esc(it.unidad) + '</span></div>' +
+      '<div class="paso"><button type="button" data-paso="-1" data-a="' + esc(it.id) + '" aria-label="Menos ' + esc(it.nombre) + '">−</button>' + val +
+      '<button type="button" data-paso="1" data-a="' + esc(it.id) + '" aria-label="Más ' + esc(it.nombre) + '">+</button></div></div>';
+  }
+  VISTAS.contar = function (a) {
+    if (necesitaInv('Contar')) return;
+    var area = a.area, its = delArea(area), b = leerBorrador(area);
+    var hechos = its.filter(function (it) { return b.c[it.id] != null; }).length;
+    marco(area, '<span id="progreso">' + hechos + ' de ' + its.length + ' contados</span>',
+      '<div class="tarjeta">' + conGrupos(its, function (it) { return filaContar(it, b.c[it.id]); }) + '</div>' +
+      '<p class="nota">Mantén presionado + para contar rápido.' + (its.some(function (it) { return it.como === 'Botellas'; }) ? ' En las botellas cada toque suma o resta ¼.' : '') + ' Si no hay ninguno, toca − para marcar 0.</p>',
+      '<button type="button" class="primario' + (hechos < its.length ? ' incompleto' : '') + '" id="btn-enviar" data-v="enviar-conteo" data-a="' + area + '">Enviar</button>');
+  };
+  function marcarContado(area, id) {
+    var its = delArea(area), b = leerBorrador(area), hechos = its.filter(function (it) { return b.c[it.id] != null; }).length;
+    var r = document.getElementById('r-' + id); if (r) r.classList.add('hecho');
+    var p = document.getElementById('progreso'); if (p) p.textContent = hechos + ' de ' + its.length + ' contados';
+    var e = document.getElementById('btn-enviar'); if (e) e.classList.toggle('incompleto', hechos < its.length);
+  }
+  function sumar(id, d) {
+    var area = pila[pila.length - 1].a.area, it = INV.items.filter(function (x) { return x.id === id; })[0];
+    if (!it) return;
+    var b = leerBorrador(area), c = b.c[id];
+    c = c == null ? (d > 0 ? (it.como === 'Botellas' ? it.paso : 1) : 0) : Math.max(0, Math.round((c + d * it.paso) * 100) / 100);
+    b.c[id] = c; guardarBorrador(area, b);
+    var v = document.getElementById('v-' + id);
+    if (v) { if (it.como === 'Botellas') v.innerHTML = botellasHTML(c); else v.textContent = num(c); v.classList.remove('vacio'); }
+    marcarContado(area, id);
+  }
+  function hayFalta(id, n) {
+    var area = pila[pila.length - 1].a.area, b = leerBorrador(area);
+    b.c[id] = n; guardarBorrador(area, b);
+    vista.querySelectorAll('[data-v="hf"][data-a="' + id + '"]').forEach(function (x) { x.setAttribute('aria-pressed', Number(x.dataset.n) === n); });
+    marcarContado(area, id);
+  }
+  function enviarConteo(area, btn) {
+    var its = delArea(area), b = leerBorrador(area);
+    var faltan = its.filter(function (it) { return b.c[it.id] == null; });
+    if (faltan.length) {
+      abrirHoja('<h2>' + (faltan.length === 1 ? 'Falta 1 por contar' : 'Faltan ' + faltan.length + ' por contar') + '</h2><p class="nota">Cuenta todos los productos de ' + area + ' para poder enviar.</p>' +
+        '<button type="button" class="primario" data-v="ir-faltante" data-a="' + esc(faltan[0].id) + '">Ir al primero</button>');
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    servidor('guardarConteo', { area: area, quien: QUIEN, conteos: b.c }).then(function (r) {
+      INV = r.inventario; borrarBorrador(area); pedidoExtra = {};
+      reemplazar('listo', { area: area, bajos: r.bajos, total: r.total });
+    }).catch(function (e) { btn.disabled = false; btn.textContent = 'Enviar'; tostada(e.message); });
+  }
+  VISTAS.listo = function (a) {
+    marco('Conteo guardado', a.area,
+      '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:24px 0 8px"><span style="width:76px;height:76px;border-radius:38px;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center">' + IC.check.replace(/14/g, '36') + '</span>' +
+      '<b style="font-size:20px">' + a.total + ' productos contados</b><span class="sub">El inventario de ' + a.area + ' ya está al día en la hoja.</span></div>' +
+      (a.bajos.length ? '<h3>Bajo el mínimo (' + a.bajos.length + ')</h3><div class="tarjeta">' + a.bajos.map(function (n) { return '<div class="fila"><span class="fuerte" style="font-size:14px">' + esc(n) + '</span></div>'; }).join('') + '</div>' : '<p class="nota" style="text-align:center">Nada quedó bajo el mínimo.</p>'),
+      (a.bajos.length ? '<button type="button" class="primario" data-v="cambiar" data-a="pedidos">Ver pedidos</button>' : '<button type="button" class="secundario" data-v="atras">Listo</button>'));
+  };
+
+  /* ---------- Pedidos ---------- */
+  function lineasPedido() {
+    var g = {};
+    INV.items.forEach(function (it) { var q = aPedir(it); if (q > 0) (g[it.prov] = g[it.prov] || []).push({ it: it, q: q }); });
+    var orden = INV.proveedores.map(function (p) { return p.nombre; });
+    return Object.keys(g).sort(function (x, y) { var a = orden.indexOf(x), b = orden.indexOf(y); return (a < 0 ? 99 : a) - (b < 0 ? 99 : b); }).map(function (k) { return { p: provDe(k), lineas: g[k] }; });
+  }
+  function mensajePedido(p, lineas) {
+    var ls = lineas.map(function (l) { return l.it.como === 'Hay o falta' ? '• ' + l.it.nombre : '• ' + l.it.nombre + ': ' + num(l.q) + ' ' + pideTxt(l.it, l.q); }).join('\n');
+    if (p.tipo === 'Cocina') return 'Para preparar · Vila Paraíso\n\n' + ls;
+    if (p.tipo === 'Lista') return 'Lista de compras · Vila Paraíso\n\n' + ls;
+    return 'Hola, buen día. Pedido de Vila Paraíso:\n\n' + ls + '\n\n' + (p.entrega ? 'Entrega: ' + p.entrega + '. ' : '') + '¡Muchas gracias!';
+  }
+  function enlaceWA(p, texto) {
+    var n = String(p.wa || '').replace(/\D/g, '');
+    if (n.length === 8) n = '506' + n;
+    return 'https://wa.me/' + n + '?text=' + encodeURIComponent(texto);
+  }
+  VISTAS.pedidos = function () {
+    if (necesitaInv('Pedidos')) return;
+    var grupos = lineasPedido();
+    marco('Pedidos', 'Según el último conteo',
+      (grupos.length ? grupos.map(function (g) {
+        var p = g.p, tot = g.lineas.reduce(function (t, l) { return t + l.q * l.it.precio; }, 0), falta = p.min && tot ? p.min - tot : 0;
+        var info = [p.tipo === 'Cocina' ? 'Para preparar en cocina' : p.tipo === 'Lista' ? 'Lista de compras' : '', p.entrega ? 'Entrega ' + esc(p.entrega) : '', p.min ? 'mínimo ' + colon(p.min) : '', p.tipo === 'WhatsApp' && !p.wa ? 'sin WhatsApp: eliges el contacto al enviar' : ''].filter(Boolean).join(' · ');
+        var texto = mensajePedido(p, g.lineas), clave = p.nombre;
+        return '<div class="tarjeta"><div class="fila"><div class="crece"><span class="fuerte" style="font-size:16px">' + esc(p.nombre) + '</span>' + (info ? '<span class="sub">' + info + '</span>' : '') + '</div>' + (enviados[clave] ? '<span class="etq ok">Enviado ✓</span>' : '') + '</div>' +
+          g.lineas.map(function (l) {
+            var hf = l.it.como === 'Hay o falta';
+            return '<div class="fila"><div class="crece"><span class="fuerte" style="font-size:14px">' + esc(l.it.nombre) + '</span><span class="sub">' + (hf ? 'Comprar' : pideTxt(l.it, l.q)) + (l.it.precio ? ' · ' + colon(l.q * l.it.precio) : '') + ' · hay ' + verValor(l.it, l.it.hay) + '</span></div>' +
+              (hf ? '<button type="button" class="secundario" style="padding:0 12px" data-v="ord" data-a="' + esc(l.it.id) + '" data-q="1" data-d="-1">Quitar</button>'
+                : '<div class="paso chico"><button type="button" data-v="ord" data-a="' + esc(l.it.id) + '" data-q="' + l.q + '" data-d="-1" aria-label="Menos">−</button><span class="val">' + num(l.q) + '</span><button type="button" data-v="ord" data-a="' + esc(l.it.id) + '" data-q="' + l.q + '" data-d="1" aria-label="Más">+</button></div>') + '</div>';
+          }).join('') +
+          '<div class="fila" style="flex-direction:column;align-items:stretch;gap:10px">' +
+          (tot ? '<div style="display:flex;justify-content:space-between"><span class="sub">Total aproximado</span><b style="font-family:\'DM Mono\',monospace">' + colon(tot) + '</b></div>' : '') +
+          (falta > 0 ? '<div class="aviso" style="margin:0">Faltan ' + colon(falta) + ' para el pedido mínimo.</div>' : '') +
+          (p.tipo === 'WhatsApp'
+            ? '<a class="wa" href="' + enlaceWA(p, texto) + '" target="_blank" rel="noopener" data-v="wa" data-a="' + esc(clave) + '">' + (enviados[clave] ? 'Abrir WhatsApp otra vez' : 'Enviar por WhatsApp') + '</a>'
+            : '<button type="button" class="wa" data-v="compartir" data-a="' + esc(clave) + '">' + (p.tipo === 'Cocina' ? 'Compartir con cocina' : 'Compartir lista') + '</button>') +
+          '</div></div>';
+      }).join('') : '<div class="tarjeta"><div class="fila" style="border:0"><div class="crece"><span class="fuerte">No hay nada por pedir</span><span class="sub">Todo está sobre el mínimo según el último conteo.</span></div></div></div>') +
+      '<p class="nota">Las cantidades llevan lo que hay de vuelta al máximo. Cámbialas con − y + antes de enviar. Los mensajes van sin precios.</p>');
+  };
+  function compartir(clave) {
+    var g = lineasPedido().filter(function (x) { return x.p.nombre === clave; })[0];
+    if (!g) return;
+    var texto = mensajePedido(g.p, g.lineas);
+    var hecho = function () { enviados[clave] = true; pintar(); };
+    if (navigator.share) navigator.share({ text: texto }).then(hecho).catch(function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(texto).then(function () { tostada('Lista copiada'); hecho(); });
+  }
+
+  /* ---------- Proveedores ---------- */
+  VISTAS.proveedores = function () {
+    if (necesitaInv('Proveedores')) return;
+    marco('Proveedores', 'A quién se le pide cada cosa',
+      '<div class="tarjeta">' + INV.proveedores.map(function (p) {
+        var n = INV.items.filter(function (it) { return it.prov === p.nombre; }).length;
+        return '<button type="button" class="fila" data-v="proveedor" data-a="' + esc(p.nombre) + '"><div class="crece"><span class="fuerte">' + esc(p.nombre) + '</span>' +
+          '<span class="sub">' + (p.tipo === 'Cocina' ? 'Se prepara en cocina' : p.tipo === 'Lista' ? 'Lista de compras' : p.wa ? 'WhatsApp ' + esc(p.wa) : '<span style="color:var(--ambar);font-weight:600">Falta el WhatsApp</span>') + ' · ' + n + (n === 1 ? ' producto' : ' productos') + '</span>' +
+          '<span class="sub">' + (p.min ? 'Pedido mínimo ' + colon(p.min) : 'Sin pedido mínimo') + (p.entrega ? ' · entrega ' + esc(p.entrega) : '') + '</span></div>' + IC.sig + '</button>';
+      }).join('') + '</div>', '',
+      '<button type="button" class="primario" style="padding:0 14px" data-v="proveedor" data-a="">+ Agregar</button>');
+  };
+  function hojaProveedor(nombre) {
+    var p = INV.proveedores.filter(function (x) { return x.nombre === nombre; })[0] || { nombre: '', wa: '', min: '', entrega: '', tipo: 'WhatsApp' };
+    var op = function (v, t) { return '<option value="' + v + '"' + (v === p.tipo ? ' selected' : '') + '>' + t + '</option>'; };
+    abrirHoja('<h2>' + (p.nombre ? 'Editar proveedor' : 'Nuevo proveedor') + '</h2>' +
+      '<div class="campo"><label for="v-nombre">Nombre</label><input id="v-nombre" value="' + esc(p.nombre) + '"></div>' +
+      '<div class="campo"><label for="v-tipo">Cómo se le pide</label><select id="v-tipo">' + op('WhatsApp', 'Por WhatsApp') + op('Lista', 'Lista de compras (súper)') + op('Cocina', 'Se prepara en cocina') + '</select></div>' +
+      '<div class="campo"><label for="v-wa">WhatsApp</label><input id="v-wa" inputmode="tel" value="' + esc(p.wa) + '" placeholder="8888 8888"></div>' +
+      '<div class="rejilla"><div class="campo"><label for="v-min">Pedido mínimo (₡)</label><input id="v-min" inputmode="numeric" value="' + esc(p.min || '') + '"></div>' +
+      '<div class="campo"><label for="v-ent">Días de entrega</label><input id="v-ent" value="' + esc(p.entrega) + '" placeholder="martes y viernes"></div></div>' +
+      '<div class="aviso" id="v-error" hidden></div>' +
+      '<div class="botones"><button type="button" class="secundario" data-v="cerrar">Cancelar</button><button type="button" class="primario" data-v="guardar-prov" data-a="' + esc(p.nombre) + '">Guardar</button></div>');
+  }
+  function guardarProveedor(antes, btn) {
+    var h = document.querySelector('.hoja'), v = function (k) { return h.querySelector('#v-' + k).value.trim(); }, err = h.querySelector('#v-error');
+    if (!v('nombre')) { err.textContent = 'Falta el nombre.'; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    servidor('guardarProveedor', { antes: antes, nombre: v('nombre'), wa: v('wa'), min: v('min'), entrega: v('ent'), tipo: v('tipo') })
+      .then(function (r) { INV = r.inventario; cerrarHoja(); pintar(); tostada('Proveedor guardado'); })
+      .catch(function (e) { btn.disabled = false; btn.textContent = 'Guardar'; err.textContent = e.message; err.hidden = false; });
+  }
+
+  /* ---------- Toques ---------- */
+  function alTocar(e) {
+    var b = e.target.closest('[data-v]');
+    if (!b) return;
+    var v = b.dataset.v, a = b.dataset.a;
+    switch (v) {
+      case 'atras': atras(); break;
+      case 'cerrar': cerrarHoja(); break;
+      case 'reintentar': RESUMEN = {}; INV = null; pintar(); break;
+      case 'ir': abrir(a); break;
+      case 'cambiar': reemplazar(a); break;
+      case 'mes': { var t = pila[pila.length - 1], r = RESUMEN[t.a.mes || new Date().getMonth() + 1]; t.a.mes = (r ? r.mes : new Date().getMonth() + 1) + Number(b.dataset.d); pintar(true); break; }
+      case 'area': pila[pila.length - 1].a.area = a; pintar(true); break;
+      case 'producto': hojaProducto(a); break;
+      case 'guardar-prod': guardarProducto(a, b); break;
+      case 'borrar-prod':
+        if (b.dataset.seguro !== '1') { b.dataset.seguro = '1'; b.textContent = '¿Seguro?'; break; }
+        b.disabled = true;
+        servidor('borrarProducto', { id: a }).then(function (r) { INV = r.inventario; cerrarHoja(); pintar(); tostada('Producto eliminado'); }).catch(function (er) { tostada(er.message); });
+        break;
+      case 'contar': abrir('contar', { area: a }); break;
+      case 'hf': hayFalta(a, Number(b.dataset.n)); break;
+      case 'enviar-conteo': enviarConteo(a, b); break;
+      case 'ir-faltante': {
+        cerrarHoja();
+        var fila = document.getElementById('r-' + a);
+        if (fila) { fila.scrollIntoView({ behavior: 'smooth', block: 'center' }); fila.classList.remove('destello'); void fila.offsetWidth; fila.classList.add('destello'); }
+        break;
+      }
+      case 'ord': pedidoExtra[a] = Math.max(0, Number(b.dataset.q) + Number(b.dataset.d)); pintar(); break;
+      case 'wa': enviados[a] = true; setTimeout(pintar, 400); break;
+      case 'compartir': compartir(a); break;
+      case 'proveedor': hojaProveedor(a); break;
+      case 'guardar-prov': guardarProveedor(a, b); break;
+    }
+  }
+  vista.addEventListener('click', alTocar);
+
+  // Mantener presionado + o − para contar rápido
+  var repetir = null, repitio = false;
+  function pararRepetir() { if (repetir) { clearTimeout(repetir.t); clearInterval(repetir.i); repetir = null; } }
+  vista.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest('[data-paso]'); if (!b) return;
+    pararRepetir(); repitio = false;
+    repetir = { t: setTimeout(function () { repetir.i = setInterval(function () { repitio = true; sumar(b.dataset.a, Number(b.dataset.paso)); }, 110); }, 450) };
+  });
+  ['pointerup', 'pointercancel'].forEach(function (t) { document.addEventListener(t, pararRepetir); });
+  document.addEventListener('scroll', pararRepetir, true);
+  vista.addEventListener('contextmenu', function (e) { if (e.target.closest('[data-paso]')) e.preventDefault(); });
+  vista.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-paso]'); if (!b) return;
+    if (repitio) { repitio = false; return; }
+    sumar(b.dataset.a, Number(b.dataset.paso));
+  });
+
+  document.getElementById('abrirInicio').onclick = function () { if (!pila.length) abrir('resumen'); };
 
   if (!window.API_URL || /PEGAR/.test(window.API_URL)) {
     burbuja('bot simple error', 'Falta el enlace del motor en config.js.');
